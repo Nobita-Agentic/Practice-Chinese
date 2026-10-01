@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>HSK 3-5 · ห้องฝึกภาษาจีน</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Kanit','sans-serif'],zh:['Noto Sans SC','sans-serif']}}}}</script>
+<style>
+  /* ---------- tokens ---------- */
+  :root{ --bg:#f1f5f9; --card:#ffffff; --soft:#f8fafc; --line:#e2e8f0; --ink:#0f172a; --mut:#64748b; --dim:#94a3b8; --brand:#2563eb; }
+  [data-theme="dark"]{ --bg:#0b1220; --card:#151e2e; --soft:#1b2639; --line:#2b3a52; --ink:#e8eef7; --mut:#9fb0c7; --dim:#7489a3; --brand:#60a5fa; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ background:var(--bg); color:var(--ink); }
+  .font-zh{font-family:'Noto Sans SC',sans-serif}
+
+  /* ---------- dark overrides for the utility classes used ---------- */
+  [data-theme="dark"] .bg-white{background-color:var(--card)!important}
+  [data-theme="dark"] .bg-slate-50{background-color:var(--soft)!important}
+  [data-theme="dark"] .bg-slate-100{background-color:#223047!important}
+  [data-theme="dark"] .bg-slate-800,[data-theme="dark"] .bg-slate-900{background-color:#0e1726!important}
+  [data-theme="dark"] .border-slate-100,[data-theme="dark"] .border-slate-200,[data-theme="dark"] .border-slate-200\/80,[data-theme="dark"] .border-slate-200\/60{border-color:var(--line)!important}
+  [data-theme="dark"] .text-slate-800,[data-theme="dark"] .text-slate-700{color:var(--ink)!important}
+  [data-theme="dark"] .text-slate-600,[data-theme="dark"] .text-slate-500{color:var(--mut)!important}
+  [data-theme="dark"] .text-slate-400{color:var(--dim)!important}
+  [data-theme="dark"] .bg-blue-50{background-color:rgba(59,130,246,.16)!important}
+  [data-theme="dark"] .bg-blue-100{background-color:rgba(59,130,246,.22)!important}
+  [data-theme="dark"] .bg-indigo-100{background-color:rgba(99,102,241,.22)!important}
+  [data-theme="dark"] .bg-emerald-50{background-color:rgba(16,185,129,.14)!important}
+  [data-theme="dark"] .bg-emerald-100{background-color:rgba(16,185,129,.2)!important}
+  [data-theme="dark"] .bg-amber-50{background-color:rgba(245,158,11,.14)!important}
+  [data-theme="dark"] .bg-amber-100{background-color:rgba(245,158,11,.2)!important}
+  [data-theme="dark"] .bg-rose-50{background-color:rgba(244,63,94,.14)!important}
+  [data-theme="dark"] .bg-rose-100{background-color:rgba(244,63,94,.2)!important}
+  [data-theme="dark"] .bg-violet-50{background-color:rgba(139,92,246,.14)!important}
+  [data-theme="dark"] .bg-violet-100{background-color:rgba(139,92,246,.2)!important}
+  [data-theme="dark"] .bg-teal-100{background-color:rgba(20,184,166,.2)!important}
+  [data-theme="dark"] .text-blue-700,[data-theme="dark"] .text-blue-800,[data-theme="dark"] .text-blue-600{color:#93c5fd!important}
+  [data-theme="dark"] .text-indigo-700,[data-theme="dark"] .text-indigo-800,[data-theme="dark"] .text-indigo-600,[data-theme="dark"] .text-indigo-500{color:#a5b4fc!important}
+  [data-theme="dark"] .text-emerald-700,[data-theme="dark"] .text-emerald-800,[data-theme="dark"] .text-emerald-600{color:#6ee7b7!important}
+  [data-theme="dark"] .text-amber-700,[data-theme="dark"] .text-amber-800,[data-theme="dark"] .text-amber-600{color:#fcd34d!important}
+  [data-theme="dark"] .text-rose-700,[data-theme="dark"] .text-rose-800,[data-theme="dark"] .text-rose-600{color:#fda4af!important}
+  [data-theme="dark"] .text-violet-700,[data-theme="dark"] .text-violet-800,[data-theme="dark"] .text-violet-500{color:#c4b5fd!important}
+  [data-theme="dark"] .text-teal-800{color:#5eead4!important}
+  [data-theme="dark"] input,[data-theme="dark"] textarea,[data-theme="dark"] select{background-color:var(--soft)!important;color:var(--ink)!important;border-color:var(--line)!important}
+  [data-theme="dark"] input::placeholder,[data-theme="dark"] textarea::placeholder{color:var(--dim)}
+
+  /* ---------- layout ---------- */
+  .wrap{max-width:720px;margin:0 auto;padding:12px}
+  @media(min-width:900px){ .wrap{max-width:900px;padding:20px} }
+  main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px}
+  button,select,input,textarea,a{font-family:inherit}
+  button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .tap{min-height:46px}
+  input[type=text],input,textarea,select{outline:none;font-size:16px} /* 16px กัน iOS ซูมเอง */
+
+  /* ---------- bottom nav ---------- */
+  .navbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--card);background:color-mix(in srgb,var(--card) 92%,transparent);
+    backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .navbar .row{display:grid;grid-template-columns:repeat(5,1fr);max-width:720px;margin:0 auto}
+  .navbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 2px 8px;
+    color:var(--dim);font-size:10px;font-weight:500;border:none;background:none;position:relative;white-space:nowrap;overflow:hidden}
+  .navbtn i{font-size:18px}
+  .navbtn.on{color:var(--brand)}
+  .navbtn.on:before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;border-radius:0 0 4px 4px;background:var(--brand)}
+
+  /* ---------- bits ---------- */
+  .lvl-on{background:var(--brand)!important;color:#fff!important;border-color:var(--brand)!important}
+  .seg{display:flex;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+  .seg button{flex:1;border-radius:10px;padding:9px 6px;font-size:13px;font-weight:600;color:var(--mut);background:none;border:none}
+  .seg button.on{background:var(--card);color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .mic-pulse{animation:pulse-animation 1.5s infinite}
+  @keyframes pulse-animation{0%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}100%{box-shadow:0 0 0 22px rgba(239,68,68,0)}}
+  .pop-in{animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes popIn{0%{transform:scale(.88);opacity:0}100%{transform:scale(1);opacity:1}}
+  .fade-in{animation:fadeIn .25s ease-out}
+  @keyframes fadeIn{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:none}}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+  .noscroll::-webkit-scrollbar{display:none}
+  .noscroll{scrollbar-width:none}
+  .step-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+
+</style>
+</head>
+<body class="min-h-screen font-sans">
+
+<!-- ================= TOP BAR ================= -->
+<header class="sticky top-0 z-30" style="background:var(--card);background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)">
+  <div class="wrap" style="padding-top:10px;padding-bottom:10px">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold font-zh shrink-0">汉</div>
+      <div class="flex-1 min-w-0">
+        <h1 class="font-bold text-[15px] leading-tight truncate">HSK 3-5 · ห้องฝึกภาษาจีน</h1>
+        <p class="text-[11px] truncate" style="color:var(--mut)" id="top-sub">คำศัพท์ · เติมคำ · แต่งประโยค · บทสนทนา · ฝึกพูด</p>
+      </div>
+      <button onclick="toggleTheme()" id="theme-btn" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:var(--soft);border:1px solid var(--line)" aria-label="สลับธีม"><i class="fa-solid fa-moon"></i></button>
+      <button onclick="switchTab('bank')" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:var(--soft);border:1px solid var(--line)" aria-label="คลังคำศัพท์"><i class="fa-solid fa-book-open"></i></button>
+    </div>
+    <div class="flex items-center gap-1.5 mt-2.5 overflow-x-auto noscroll">
+      <span class="text-[11px] font-semibold shrink-0 me-0.5" style="color:var(--dim)">ระดับ</span>
+      <button data-lvl="3" onclick="toggleLevel(3)" class="lvl-btn lvl-on px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0" style="border:1px solid var(--line)">HSK 3</button>
+      <button data-lvl="4" onclick="toggleLevel(4)" class="lvl-btn lvl-on px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0" style="border:1px solid var(--line)">HSK 4</button>
+      <button data-lvl="5" onclick="toggleLevel(5)" class="lvl-btn lvl-on px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0" style="border:1px solid var(--line)">HSK 5</button>
+      <span class="w-px h-5 shrink-0 mx-1" style="background:var(--line)"></span>
+      <button onclick="switchTab('home');scrollToCats()" class="px-3 py-1.5 rounded-lg text-xs font-medium shrink-0" style="border:1px solid var(--line);color:var(--mut)"><i class="fa-solid fa-filter"></i> <span id="cat-sum">ทุกหมวด</span></button>
+    </div>
+  </div>
+</header>
+
+<div id="file-warn" class="hidden wrap" style="padding-top:12px;padding-bottom:0"></div>
+
+<main class="wrap">
+
+<!-- ================= HOME ================= -->
+<section id="sec-home" class="space-y-4">
+  <div class="rounded-3xl p-5 text-white shadow-lg" style="background:linear-gradient(135deg,#2563eb,#4f46e5)">
+    <h2 class="text-lg font-bold mb-1">พร้อมฝึกภาษาจีนแล้วหรือยัง 🎉</h2>
+    <p class="text-[13px] mb-4" style="color:#dbeafe">วันนี้ขอแค่ 10 นาทีก็พอ — ทำผิดได้ เป้าหมายคือ “กล้าพูด” ไม่ใช่ “พูดถูกหมด”</p>
+    <div class="grid grid-cols-2 gap-2.5">
+      <div class="rounded-2xl p-3" style="background:rgba(255,255,255,.16)"><div class="text-xl font-bold" id="st-known">0</div><div class="text-[11px]" style="color:#dbeafe">คำที่จำได้</div></div>
+      <div class="rounded-2xl p-3" style="background:rgba(255,255,255,.16)"><div class="text-xl font-bold" id="st-correct">0</div><div class="text-[11px]" style="color:#dbeafe">ข้อที่ตอบถูก</div></div>
+      <div class="rounded-2xl p-3" style="background:rgba(255,255,255,.16)"><div class="text-xl font-bold" id="st-sent">0</div><div class="text-[11px]" style="color:#dbeafe">ประโยคที่แต่งเอง</div></div>
+      <div class="rounded-2xl p-3" style="background:rgba(255,255,255,.16)"><div class="text-xl font-bold" id="st-speak">0</div><div class="text-[11px]" style="color:#dbeafe">ออกเสียงผ่าน</div></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3" id="home-cards"></div>
+
+  <div class="card p-4" id="cat-box">
+    <h3 class="font-semibold text-sm mb-3"><i class="fa-solid fa-filter text-blue-600"></i> เลือกหมวดคำศัพท์ (ใช้กับทุกโหมด)</h3>
+    <div id="cat-chips" class="flex flex-wrap gap-2"></div>
+    <p class="text-xs mt-3" style="color:var(--dim)">ตอนนี้มีคำศัพท์ตรงเงื่อนไข <span id="pool-count" class="font-semibold">0</span> คำ</p>
+  </div>
+
+  <div class="card p-4">
+    <h3 class="font-semibold text-sm mb-3"><i class="fa-solid fa-volume-high text-blue-600"></i> ตรวจสอบเสียงอ่าน</h3>
+    <div id="audio-status"></div>
+  </div>
+
+  <div class="card p-4">
+    <h3 class="font-semibold text-sm mb-3"><i class="fa-solid fa-microphone text-rose-500"></i> ตรวจสอบไมโครโฟน</h3>
+    <div id="mic-status"></div>
+  </div>
+</section>
+
+<!-- ================= FLASHCARD ================= -->
+<section id="sec-flash" class="hidden space-y-3">
+  <div class="card p-3">
+    <div class="grid grid-cols-2 gap-2">
+      <label class="block"><span class="text-[11px] font-semibold" style="color:var(--dim)">เวลาต่อการ์ด</span>
+        <select id="fc-timer" onchange="startFlash()" class="w-full mt-1 rounded-xl px-3 py-2 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+          <option value="0">ไม่จำกัดเวลา</option><option value="3">3 วินาที</option><option value="5" selected>5 วินาที</option><option value="10">10 วินาที</option>
+        </select></label>
+      <label class="block"><span class="text-[11px] font-semibold" style="color:var(--dim)">จำนวนการ์ด</span>
+        <select id="fc-size" onchange="startFlash()" class="w-full mt-1 rounded-xl px-3 py-2 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+          <option value="10" selected>10 ใบ</option><option value="20">20 ใบ</option><option value="0">ทั้งหมด</option>
+        </select></label>
+    </div>
+    <div class="flex items-center justify-between mt-3">
+      <label class="inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="fc-auto" class="sr-only peer">
+        <div class="relative w-10 h-6 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[3px] after:start-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] after:transition-all peer-checked:after:translate-x-full" style="background:var(--line)"></div>
+        <span class="ms-2 text-xs" style="color:var(--mut)">ไปข้อถัดไปเอง</span>
+      </label>
+      <div class="flex items-center gap-3 text-sm font-semibold">
+        <span class="text-emerald-600"><i class="fa-solid fa-circle-check"></i> <span id="fc-known">0</span></span>
+        <span class="text-rose-500"><i class="fa-solid fa-circle-xmark"></i> <span id="fc-forgot">0</span></span>
+        <button onclick="startFlash()" class="w-9 h-9 rounded-lg text-blue-600" style="background:var(--soft)" aria-label="เริ่มใหม่"><i class="fa-solid fa-rotate"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-5 text-center flex flex-col" style="min-height:62vh">
+    <div class="w-full rounded-full h-1.5 mb-4 overflow-hidden" style="background:var(--line)"><div id="fc-bar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-100 ease-linear" style="width:100%"></div></div>
+    <div class="flex justify-between items-center gap-2">
+      <div class="flex gap-1.5 flex-wrap"><span id="fc-lvl" class="px-2.5 py-1 rounded-full text-[11px] font-semibold">HSK</span><span id="fc-cat" class="px-2.5 py-1 rounded-full text-[11px] font-medium">หมวด</span></div>
+      <span id="fc-count" class="text-xs font-medium" style="color:var(--dim)">0 / 0</span>
+    </div>
+    <div class="my-auto py-5">
+      <div id="fc-hanzi" class="font-zh text-6xl font-bold tracking-wide mb-3 cursor-pointer" onclick="speakZh(document.getElementById('fc-hanzi').innerText)">--</div>
+      <button onclick="speakZh(document.getElementById('fc-hanzi').innerText)" class="inline-flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 px-4 py-2 rounded-full tap"><i class="fa-solid fa-volume-high"></i> ฟังเสียงอ่าน</button>
+    </div>
+    <div id="fc-reveal" class="rounded-2xl p-4 mb-2 opacity-0 transition-opacity duration-300" style="background:var(--soft);border:1px solid var(--line);min-height:120px">
+      <div id="fc-pinyin" class="text-lg font-medium text-indigo-600 mb-1">--</div>
+      <div id="fc-th" class="text-[15px] font-semibold">--</div>
+      <div class="mt-2 pt-2" style="border-top:1px solid var(--line)">
+        <div id="fc-sent" class="text-sm font-zh" style="color:var(--mut)">--</div>
+        <div id="fc-sentth" class="text-[11px] mt-0.5" style="color:var(--dim)">--</div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <button id="fc-btn-reveal" onclick="revealFlash(true)" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl shadow-md tap"><i class="fa-solid fa-eye"></i> เฉลยคำศัพท์</button>
+      <div id="fc-actions" class="hidden grid grid-cols-2 gap-2.5">
+        <button onclick="markFlash(false)" class="py-3 bg-rose-50 text-rose-600 font-semibold rounded-2xl tap" style="border:1px solid rgba(244,63,94,.3)"><i class="fa-solid fa-rotate-left"></i> ยังจำไม่ได้</button>
+        <button onclick="markFlash(true)" class="py-3 bg-emerald-50 text-emerald-600 font-semibold rounded-2xl tap" style="border:1px solid rgba(16,185,129,.3)"><i class="fa-solid fa-check"></i> จำได้แล้ว</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DRILL (เติมคำ / แต่งประโยค) ================= -->
+<section id="sec-drill" class="hidden space-y-3">
+  <div class="seg">
+    <button id="sub-fill-btn" class="on" onclick="switchDrill('fill')"><i class="fa-solid fa-pen-to-square"></i> เติมคำ</button>
+    <button id="sub-write-btn" onclick="switchDrill('write')"><i class="fa-solid fa-feather"></i> แต่งประโยค</button>
+  </div>
+
+  <!-- ---- เติมคำ ---- -->
+  <div id="sub-fill" class="space-y-3">
+    <div class="card p-3">
+      <div class="grid grid-cols-2 gap-2">
+        <label class="block"><span class="text-[11px] font-semibold" style="color:var(--dim)">ฝึกเรื่อง</span>
+          <select id="fi-kind" onchange="startFill()" class="w-full mt-1 rounded-xl px-3 py-2 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+            <option value="vocab">คำศัพท์</option><option value="pattern">รูปประโยค</option><option value="mix" selected>ผสมกัน</option>
+          </select></label>
+        <label class="block"><span class="text-[11px] font-semibold" style="color:var(--dim)">วิธีตอบ</span>
+          <select id="fi-mode" onchange="startFill()" class="w-full mt-1 rounded-xl px-3 py-2 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+            <option value="choice" selected>เลือกตอบ</option><option value="type">พิมพ์เอง</option>
+          </select></label>
+        <label class="block"><span class="text-[11px] font-semibold" style="color:var(--dim)">จำนวนข้อ</span>
+          <select id="fi-size" onchange="startFill()" class="w-full mt-1 rounded-xl px-3 py-2 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+            <option value="5">5 ข้อ</option><option value="10" selected>10 ข้อ</option><option value="15">15 ข้อ</option>
+          </select></label>
+        <div class="flex items-end"><div class="w-full text-center text-sm font-semibold bg-blue-50 text-blue-700 px-3 py-2.5 rounded-xl">คะแนน <span id="fi-score">0</span>/<span id="fi-total">0</span></div></div>
+      </div>
+    </div>
+    <div class="card p-5">
+      <div class="flex justify-between items-center gap-3 mb-3">
+        <span id="fi-tag" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-100 text-indigo-700">ข้อที่ 1</span>
+        <div class="flex-1 rounded-full h-1.5 overflow-hidden" style="background:var(--line)"><div id="fi-bar" class="bg-indigo-500 h-1.5" style="width:0%"></div></div>
+        <button onclick="speakZh(currentFillAudio())" class="w-9 h-9 rounded-lg text-blue-600" style="background:var(--soft)"><i class="fa-solid fa-volume-high"></i></button>
+      </div>
+      <p id="fi-hint" class="text-xs mb-3" style="color:var(--mut)"></p>
+      <div id="fi-question" class="font-zh text-2xl leading-relaxed text-center my-5">--</div>
+      <div id="fi-questh" class="text-center text-sm mb-5" style="color:var(--mut)">--</div>
+      <div id="fi-answerbox"></div>
+      <div id="fi-feedback" class="mt-4"></div>
+      <button id="fi-next" onclick="nextFill()" class="hidden w-full mt-4 py-3 text-white font-semibold rounded-2xl tap" style="background:var(--ink);color:var(--card)">ข้อถัดไป <i class="fa-solid fa-arrow-right ms-1"></i></button>
+    </div>
+  </div>
+
+  <!-- ---- แต่งประโยค ---- -->
+  <div id="sub-write" class="hidden space-y-3">
+    <div class="card p-3 flex items-center gap-2">
+      <label class="flex-1"><span class="text-[11px] font-semibold" style="color:var(--dim)">ชุดโจทย์</span>
+        <select id="wr-kind" onchange="startWrite()" class="w-full mt-1 rounded-xl px-3 py-2 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+          <option value="situation">โจทย์สถานการณ์</option><option value="word">แต่งจากคำศัพท์</option>
+        </select></label>
+      <button onclick="startWrite()" class="mt-5 px-4 py-2.5 rounded-xl text-sm font-medium tap" style="background:var(--soft);border:1px solid var(--line)"><i class="fa-solid fa-shuffle"></i> สุ่มใหม่</button>
+    </div>
+    <div class="card p-5">
+      <div class="flex justify-between items-center mb-3">
+        <span id="wr-lvl" class="px-2.5 py-1 rounded-full text-[11px] font-semibold">HSK</span>
+        <span id="wr-count" class="text-xs" style="color:var(--dim)">โจทย์ที่ 1</span>
+      </div>
+      <p id="wr-th" class="text-[15px] font-semibold mb-1">--</p>
+      <p id="wr-zh" class="font-zh text-sm mb-3" style="color:var(--mut)">--</p>
+      <div id="wr-must" class="flex flex-wrap gap-2 mb-2"></div>
+      <p id="wr-hint" class="text-xs text-amber-700 bg-amber-50 rounded-xl px-3 py-2 mb-4" style="border:1px solid rgba(245,158,11,.3)"></p>
+      <textarea id="wr-input" rows="3" placeholder="พิมพ์ประโยคภาษาจีนที่นี่… เช่น 因为堵车，所以我迟到了。" class="font-zh w-full rounded-2xl p-4 text-lg" style="background:var(--soft);border:1px solid var(--line)"></textarea>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button onclick="checkWrite()" class="col-span-2 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl tap"><i class="fa-solid fa-circle-check"></i> ตรวจประโยคของฉัน</button>
+        <button onclick="speakZh(document.getElementById('wr-input').value)" class="py-3 rounded-2xl font-medium text-sm tap" style="background:var(--soft);border:1px solid var(--line)"><i class="fa-solid fa-volume-high"></i> ฟังประโยคฉัน</button>
+        <button onclick="nextWrite()" class="py-3 rounded-2xl font-medium text-sm text-white tap" style="background:var(--ink);color:var(--card)">โจทย์ถัดไป <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+      <div id="wr-feedback" class="mt-5"></div>
+    </div>
+    <div class="card p-4">
+      <div class="flex justify-between items-center mb-3 gap-2">
+        <h3 class="font-semibold text-sm"><i class="fa-solid fa-bookmark text-blue-600"></i> ประโยคที่แต่งไว้ (<span id="wr-saved-n">0</span>)</h3>
+        <div class="flex gap-2">
+          <button onclick="exportSentences()" class="text-xs px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 font-medium"><i class="fa-solid fa-file-excel"></i> Excel</button>
+          <button onclick="clearSentences()" class="text-xs px-3 py-2 rounded-lg" style="background:var(--soft)">ล้าง</button>
+        </div>
+      </div>
+      <div id="wr-saved-list" class="space-y-2" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DIALOGUE ================= -->
+<section id="sec-dialog" class="hidden space-y-3">
+  <div id="dlg-list" class="grid grid-cols-1 gap-3"></div>
+  <div id="dlg-detail" class="hidden"></div>
+</section>
+
+<!-- ================= SPEAKING ================= -->
+<section id="sec-speak" class="hidden space-y-3">
+  <div class="card p-3 flex items-center gap-2">
+    <label class="flex-1"><span class="text-[11px] font-semibold" style="color:var(--dim)">ฝึกพูดจาก</span>
+      <select id="sp-kind" onchange="startSpeak()" class="w-full mt-1 rounded-xl px-3 py-2 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+        <option value="words">คำศัพท์</option><option value="sentences">ประโยคตัวอย่าง</option><option value="dialog">บทสนทนาที่ทำงาน</option>
+      </select></label>
+    <div class="mt-5 bg-emerald-50 text-emerald-700 px-3 py-2.5 rounded-xl text-xs font-semibold">ผ่าน <span id="sp-score">0</span></div>
+  </div>
+  <div class="card p-5 text-center">
+    <div class="rounded-2xl p-5 mb-5 relative" style="background:var(--soft);border:1px solid var(--line)">
+      <button onclick="speakZh(document.getElementById('sp-hanzi').innerText)" class="absolute top-2 right-2 w-10 h-10 rounded-xl text-blue-600"><i class="fa-solid fa-volume-high text-lg"></i></button>
+      <span id="sp-tag" class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700 inline-block mb-3">--</span>
+      <h2 id="sp-hanzi" class="font-zh text-3xl font-bold mb-2 leading-relaxed">…</h2>
+      <p id="sp-pinyin" class="text-base font-medium text-blue-600 mb-1">--</p>
+      <p id="sp-th" class="text-sm" style="color:var(--mut)">--</p>
+    </div>
+    <button id="sp-mic" onclick="toggleMic()" class="w-24 h-24 bg-gradient-to-tr from-rose-500 to-red-600 text-white rounded-full text-3xl shadow-xl mx-auto flex items-center justify-center"><i class="fa-solid fa-microphone"></i></button>
+    <p id="sp-status" class="text-xs font-medium my-3" style="color:var(--dim)">แตะไมโครโฟน แล้วออกเสียงตามด้านบน</p>
+    <div class="rounded-2xl p-4" style="background:var(--soft);border:1px solid var(--line);min-height:86px">
+      <span class="text-[11px]" style="color:var(--dim)">สิ่งที่ระบบได้ยิน</span>
+      <div id="sp-heard" class="font-zh text-2xl font-semibold mt-1">—</div>
+      <div id="sp-result" class="text-xs font-bold mt-2"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-2 mt-4">
+      <button onclick="skipSpeak()" class="py-3 rounded-2xl text-sm font-medium tap" style="background:var(--soft);border:1px solid var(--line)">ข้ามข้อนี้</button>
+      <button onclick="nextSpeak()" class="py-3 text-sm font-semibold rounded-2xl tap" style="background:var(--ink);color:var(--card)">ข้อถัดไป <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VOCAB BANK ================= -->
+<section id="sec-bank" class="hidden space-y-3">
+  <div class="card p-3 space-y-3">
+    <div class="relative">
+      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2" style="color:var(--dim)"></i>
+      <input id="bk-search" oninput="renderBank()" placeholder="ค้นหาตัวจีน พินอิน หรือคำแปลไทย…" class="w-full rounded-xl pl-9 pr-4 py-3 text-sm tap" style="background:var(--soft);border:1px solid var(--line)">
+    </div>
+    <div class="seg">
+      <button id="bkv-vocab" class="on" onclick="setBankView('vocab')">คำศัพท์</button>
+      <button id="bkv-pattern" onclick="setBankView('pattern')">รูปประโยค 句型</button>
+    </div>
+    <select id="bk-view" class="hidden"><option value="vocab">vocab</option><option value="pattern">pattern</option></select>
+    <details class="rounded-xl p-3" style="background:var(--soft);border:1px solid var(--line)">
+      <summary class="text-xs font-semibold cursor-pointer" style="color:var(--mut)">จัดการคลังคำศัพท์ด้วย Excel</summary>
+      <div class="flex flex-wrap gap-2 mt-3">
+        <button onclick="downloadTemplate()" class="text-xs px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 font-medium"><i class="fa-solid fa-download"></i> ดาวน์โหลดเทมเพลต</button>
+        <label class="text-xs px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-medium cursor-pointer"><i class="fa-solid fa-upload"></i> นำเข้าไฟล์<input type="file" accept=".xlsx,.xls,.csv" onchange="importExcel(event)" class="hidden"></label>
+        <button onclick="exportCurrentBank()" class="text-xs px-3 py-2 rounded-lg font-medium" style="background:var(--card);border:1px solid var(--line)"><i class="fa-solid fa-file-export"></i> ส่งออกคลังปัจจุบัน</button>
+        <button onclick="resetBank()" class="text-xs px-3 py-2 rounded-lg bg-rose-50 text-rose-600 font-medium"><i class="fa-solid fa-rotate-left"></i> คืนค่าเริ่มต้น</button>
+      </div>
+      <p id="bk-status" class="text-xs mt-2"></p>
+    </details>
+  </div>
+  <div id="bk-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+</section>
+
+</main>
+
+<!-- ================= BOTTOM NAV ================= -->
+<nav class="navbar">
+  <div class="row">
+    <button id="tab-home"   onclick="switchTab('home')"   class="navbtn on"><i class="fa-solid fa-house"></i><span>หน้าหลัก</span></button>
+    <button id="tab-flash"  onclick="switchTab('flash')"  class="navbtn"><i class="fa-solid fa-clone"></i><span>การ์ด</span></button>
+    <button id="tab-drill"  onclick="switchTab('drill')"  class="navbtn"><i class="fa-solid fa-pen-to-square"></i><span>ฝึกหัด</span></button>
+    <button id="tab-dialog" onclick="switchTab('dialog')" class="navbtn"><i class="fa-solid fa-comments"></i><span>บทสนทนา</span></button>
+    <button id="tab-speak"  onclick="switchTab('speak')"  class="navbtn"><i class="fa-solid fa-microphone"></i><span>ฝึกพูด</span></button>
+  </div>
+</nav>
+<button id="tab-bank" onclick="switchTab('bank')" class="hidden"></button>
+
+<!-- ================= PRAISE ================= -->
+<div id="praise" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3" style="background:rgba(15,23,42,.55);backdrop-filter:blur(4px)">
+  <div class="card w-full max-w-md p-6 text-center pop-in" style="box-shadow:0 24px 60px rgba(0,0,0,.3)">
+    <div id="pr-emoji" class="text-6xl mb-3">🎉</div>
+    <div id="pr-zh" class="font-zh text-3xl font-bold text-blue-600 mb-1">太棒了！</div>
+    <div id="pr-py" class="text-sm mb-4" style="color:var(--dim)">Tài bàng le!</div>
+    <div id="pr-score" class="inline-block bg-blue-50 text-blue-700 font-bold px-4 py-2 rounded-xl mb-4">--</div>
+    <p id="pr-th" class="font-medium mb-3">--</p>
+    <p id="pr-always" class="text-sm rounded-xl p-3 mb-5" style="background:var(--soft);color:var(--mut)">--</p>
+    <div class="grid grid-cols-2 gap-2">
+      <button onclick="closePraise()" class="py-3 rounded-2xl font-semibold tap" style="background:var(--soft)">ปิด</button>
+      <button onclick="praiseAgain()" class="py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold tap">เล่นอีกรอบ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   คลังคำศัพท์ HSK 3 - 5
+   โครงสร้าง: { id, level, cat, hanzi, pinyin, th, sent, sentPy, sentTh }
+   cat: work | communication | transportation | daily | emotion | study | general
+   ============================================================ */
+const VOCAB_SEED = [
+
+/* ---------------- HSK 3 ---------------- */
+{ id:301, level:3, cat:'study', hanzi:'认真', pinyin:'rèn zhēn', th:'ตั้งใจ, จริงจัง', sent:'他每天都认真地复习中文。', sentPy:'Tā měi tiān dōu rènzhēn de fùxí Zhōngwén.', sentTh:'เขาทบทวนภาษาจีนอย่างตั้งใจทุกวัน' },
+{ id:302, level:3, cat:'study', hanzi:'努力', pinyin:'nǔ lì', th:'พยายาม, ขยัน', sent:'只要努力，就一定会进步。', sentPy:'Zhǐyào nǔlì, jiù yīdìng huì jìnbù.', sentTh:'ขอแค่พยายาม ก็ต้องเก่งขึ้นแน่นอน' },
+{ id:303, level:3, cat:'study', hanzi:'练习', pinyin:'liàn xí', th:'ฝึกฝน, แบบฝึกหัด', sent:'我每天练习说中文二十分钟。', sentPy:'Wǒ měi tiān liànxí shuō Zhōngwén èrshí fēnzhōng.', sentTh:'ฉันฝึกพูดภาษาจีนวันละ 20 นาที' },
+{ id:304, level:3, cat:'study', hanzi:'复习', pinyin:'fù xí', th:'ทบทวน', sent:'考试以前要好好复习。', sentPy:'Kǎoshì yǐqián yào hǎohāo fùxí.', sentTh:'ก่อนสอบต้องทบทวนให้ดี' },
+{ id:305, level:3, cat:'work', hanzi:'完成', pinyin:'wán chéng', th:'ทำเสร็จ, ทำให้สำเร็จ', sent:'我已经完成今天的工作了。', sentPy:'Wǒ yǐjīng wánchéng jīntiān de gōngzuò le.', sentTh:'ฉันทำงานของวันนี้เสร็จแล้ว' },
+{ id:306, level:3, cat:'general', hanzi:'办法', pinyin:'bàn fǎ', th:'วิธีการ, ทางแก้', sent:'别着急，我们一起想办法。', sentPy:'Bié zháojí, wǒmen yīqǐ xiǎng bànfǎ.', sentTh:'อย่าร้อนใจ เรามาช่วยกันคิดวิธี' },
+{ id:307, level:3, cat:'general', hanzi:'决定', pinyin:'jué dìng', th:'ตัดสินใจ, การตัดสินใจ', sent:'我决定下个月去中国出差。', sentPy:'Wǒ juédìng xià gè yuè qù Zhōngguó chūchāi.', sentTh:'ฉันตัดสินใจไปทำงานที่จีนเดือนหน้า' },
+{ id:308, level:3, cat:'communication', hanzi:'同意', pinyin:'tóng yì', th:'เห็นด้วย, อนุมัติ', sent:'经理同意了我的请假申请。', sentPy:'Jīnglǐ tóngyì le wǒ de qǐngjià shēnqǐng.', sentTh:'ผู้จัดการอนุมัติใบลาของฉันแล้ว' },
+{ id:309, level:3, cat:'communication', hanzi:'帮忙', pinyin:'bāng máng', th:'ช่วยเหลือ', sent:'你能帮忙看一下这个文件吗？', sentPy:'Nǐ néng bāngmáng kàn yīxià zhège wénjiàn ma?', sentTh:'คุณช่วยดูเอกสารฉบับนี้ให้หน่อยได้ไหม' },
+{ id:310, level:3, cat:'work', hanzi:'同事', pinyin:'tóng shì', th:'เพื่อนร่วมงาน', sent:'我的同事都很热情。', sentPy:'Wǒ de tóngshì dōu hěn rèqíng.', sentTh:'เพื่อนร่วมงานของฉันเป็นมิตรกันมาก' },
+{ id:311, level:3, cat:'work', hanzi:'经理', pinyin:'jīng lǐ', th:'ผู้จัดการ', sent:'经理正在开会，请稍等。', sentPy:'Jīnglǐ zhèngzài kāihuì, qǐng shāo děng.', sentTh:'ผู้จัดการกำลังประชุมอยู่ กรุณารอสักครู่' },
+{ id:312, level:3, cat:'work', hanzi:'会议', pinyin:'huì yì', th:'การประชุม', sent:'明天上午九点有一个会议。', sentPy:'Míngtiān shàngwǔ jiǔ diǎn yǒu yī gè huìyì.', sentTh:'พรุ่งนี้เก้าโมงเช้ามีประชุมหนึ่งนัด' },
+{ id:313, level:3, cat:'work', hanzi:'迟到', pinyin:'chí dào', th:'มาสาย', sent:'路上堵车，我迟到了五分钟。', sentPy:'Lùshang dǔchē, wǒ chídào le wǔ fēnzhōng.', sentTh:'รถติดระหว่างทาง ฉันมาสายห้านาที' },
+{ id:314, level:3, cat:'work', hanzi:'请假', pinyin:'qǐng jià', th:'ลา (งาน/เรียน)', sent:'我明天想请假去医院。', sentPy:'Wǒ míngtiān xiǎng qǐngjià qù yīyuàn.', sentTh:'พรุ่งนี้ฉันอยากลางานเพื่อไปโรงพยาบาล' },
+{ id:315, level:3, cat:'work', hanzi:'客人', pinyin:'kè rén', th:'แขก, ลูกค้า', sent:'客人下午三点到公司。', sentPy:'Kèrén xiàwǔ sān diǎn dào gōngsī.', sentTh:'ลูกค้าจะมาถึงบริษัทบ่ายสามโมง' },
+{ id:316, level:3, cat:'general', hanzi:'简单', pinyin:'jiǎn dān', th:'ง่าย, เรียบง่าย', sent:'这个问题不太简单。', sentPy:'Zhège wèntí bù tài jiǎndān.', sentTh:'ปัญหานี้ไม่ค่อยง่ายเท่าไหร่' },
+{ id:317, level:3, cat:'daily', hanzi:'习惯', pinyin:'xí guàn', th:'ความเคยชิน, เคยชิน', sent:'我已经习惯早起了。', sentPy:'Wǒ yǐjīng xíguàn zǎoqǐ le.', sentTh:'ฉันเคยชินกับการตื่นเช้าแล้ว' },
+{ id:318, level:3, cat:'daily', hanzi:'健康', pinyin:'jiàn kāng', th:'สุขภาพ, แข็งแรง', sent:'多运动对身体健康有好处。', sentPy:'Duō yùndòng duì shēntǐ jiànkāng yǒu hǎochù.', sentTh:'ออกกำลังกายมาก ๆ ดีต่อสุขภาพร่างกาย' },
+{ id:319, level:3, cat:'emotion', hanzi:'担心', pinyin:'dān xīn', th:'เป็นห่วง, กังวล', sent:'别担心，我会帮你的。', sentPy:'Bié dānxīn, wǒ huì bāng nǐ de.', sentTh:'ไม่ต้องกังวล ฉันจะช่วยคุณเอง' },
+{ id:320, level:3, cat:'emotion', hanzi:'生气', pinyin:'shēng qì', th:'โกรธ', sent:'老板没有生气，他只是有点儿累。', sentPy:'Lǎobǎn méiyǒu shēngqì, tā zhǐshì yǒudiǎnr lèi.', sentTh:'เจ้านายไม่ได้โกรธ เขาแค่เหนื่อยนิดหน่อย' },
+{ id:321, level:3, cat:'emotion', hanzi:'放心', pinyin:'fàng xīn', th:'วางใจ, สบายใจ', sent:'这件事交给我，你放心吧。', sentPy:'Zhè jiàn shì jiāo gěi wǒ, nǐ fàngxīn ba.', sentTh:'เรื่องนี้มอบให้ฉัน คุณวางใจได้เลย' },
+{ id:322, level:3, cat:'general', hanzi:'遇到', pinyin:'yù dào', th:'พบเจอ, ประสบ', sent:'遇到问题可以随时问我。', sentPy:'Yùdào wèntí kěyǐ suíshí wèn wǒ.', sentTh:'เจอปัญหาถามฉันได้ตลอดเวลา' },
+{ id:323, level:3, cat:'transportation', hanzi:'地铁', pinyin:'dì tiě', th:'รถไฟใต้ดิน', sent:'坐地铁去公司最快。', sentPy:'Zuò dìtiě qù gōngsī zuì kuài.', sentTh:'นั่งรถไฟใต้ดินไปบริษัทเร็วที่สุด' },
+{ id:324, level:3, cat:'transportation', hanzi:'司机', pinyin:'sī jī', th:'คนขับรถ', sent:'司机师傅，请到机场。', sentPy:'Sījī shīfu, qǐng dào jīchǎng.', sentTh:'คุณคนขับครับ ไปสนามบินครับ' },
+{ id:325, level:3, cat:'transportation', hanzi:'地图', pinyin:'dì tú', th:'แผนที่', sent:'我用手机上的地图找路。', sentPy:'Wǒ yòng shǒujī shàng de dìtú zhǎo lù.', sentTh:'ฉันใช้แผนที่ในมือถือหาทาง' },
+{ id:326, level:3, cat:'transportation', hanzi:'护照', pinyin:'hù zhào', th:'หนังสือเดินทาง', sent:'出国以前别忘了带护照。', sentPy:'Chūguó yǐqián bié wàng le dài hùzhào.', sentTh:'ก่อนไปต่างประเทศอย่าลืมพกพาสปอร์ต' },
+{ id:327, level:3, cat:'transportation', hanzi:'行李箱', pinyin:'xíng li xiāng', th:'กระเป๋าเดินทาง', sent:'我的行李箱有点儿重。', sentPy:'Wǒ de xínglixiāng yǒudiǎnr zhòng.', sentTh:'กระเป๋าเดินทางของฉันหนักไปหน่อย' },
+{ id:328, level:3, cat:'general', hanzi:'终于', pinyin:'zhōng yú', th:'ในที่สุด', sent:'等了很久，公共汽车终于来了。', sentPy:'Děng le hěn jiǔ, gōnggòng qìchē zhōngyú lái le.', sentTh:'รอมานาน ในที่สุดรถเมล์ก็มา' },
+{ id:329, level:3, cat:'general', hanzi:'必须', pinyin:'bì xū', th:'จำเป็นต้อง', sent:'我们必须准时到机场。', sentPy:'Wǒmen bìxū zhǔnshí dào jīchǎng.', sentTh:'พวกเราต้องไปถึงสนามบินให้ตรงเวลา' },
+{ id:330, level:3, cat:'general', hanzi:'解决', pinyin:'jiě jué', th:'แก้ไข (ปัญหา)', sent:'这个问题已经解决了。', sentPy:'Zhège wèntí yǐjīng jiějué le.', sentTh:'ปัญหานี้แก้ไขเรียบร้อยแล้ว' },
+
+/* ---------------- HSK 4 ---------------- */
+{ id:401, level:4, cat:'work', hanzi:'安排', pinyin:'ān pái', th:'จัดการ, จัดตารางเวลา', sent:'请你安排一下明天的会议。', sentPy:'Qǐng nǐ ānpái yīxià míngtiān de huìyì.', sentTh:'ช่วยจัดการเรื่องประชุมพรุ่งนี้หน่อย' },
+{ id:402, level:4, cat:'work', hanzi:'任务', pinyin:'rèn wu', th:'ภารกิจ, งานที่ได้รับมอบหมาย', sent:'这个任务必须今天完成。', sentPy:'Zhège rènwu bìxū jīntiān wánchéng.', sentTh:'งานชิ้นนี้ต้องเสร็จภายในวันนี้' },
+{ id:403, level:4, cat:'work', hanzi:'负责', pinyin:'fù zé', th:'รับผิดชอบ', sent:'我负责跟客户联系。', sentPy:'Wǒ fùzé gēn kèhù liánxì.', sentTh:'ฉันรับผิดชอบการติดต่อกับลูกค้า' },
+{ id:404, level:4, cat:'communication', hanzi:'联系', pinyin:'lián xì', th:'ติดต่อ', sent:'有问题请随时跟我联系。', sentPy:'Yǒu wèntí qǐng suíshí gēn wǒ liánxì.', sentTh:'มีปัญหากรุณาติดต่อฉันได้ตลอด' },
+{ id:405, level:4, cat:'communication', hanzi:'通知', pinyin:'tōng zhī', th:'แจ้ง, ประกาศ', sent:'请通知大家下午两点开会。', sentPy:'Qǐng tōngzhī dàjiā xiàwǔ liǎng diǎn kāihuì.', sentTh:'ช่วยแจ้งทุกคนว่าบ่ายสองโมงประชุม' },
+{ id:406, level:4, cat:'communication', hanzi:'讨论', pinyin:'tǎo lùn', th:'หารือ, อภิปราย', sent:'我们一起讨论一下方案吧。', sentPy:'Wǒmen yīqǐ tǎolùn yīxià fāng\'àn ba.', sentTh:'เรามาหารือเรื่องแผนงานกันหน่อย' },
+{ id:407, level:4, cat:'communication', hanzi:'意见', pinyin:'yì jiàn', th:'ความคิดเห็น', sent:'您对这个计划有什么意见？', sentPy:'Nín duì zhège jìhuà yǒu shénme yìjiàn?', sentTh:'คุณมีความเห็นอย่างไรกับแผนนี้' },
+{ id:408, level:4, cat:'communication', hanzi:'详细', pinyin:'xiáng xì', th:'ละเอียด', sent:'请把情况详细说明一下。', sentPy:'Qǐng bǎ qíngkuàng xiángxì shuōmíng yīxià.', sentTh:'ช่วยอธิบายสถานการณ์อย่างละเอียดหน่อย' },
+{ id:409, level:4, cat:'work', hanzi:'内容', pinyin:'nèi róng', th:'เนื้อหา', sent:'会议的内容我已经记下来了。', sentPy:'Huìyì de nèiróng wǒ yǐjīng jì xiàlái le.', sentTh:'เนื้อหาการประชุมฉันจดไว้แล้ว' },
+{ id:410, level:4, cat:'work', hanzi:'重点', pinyin:'zhòng diǎn', th:'จุดสำคัญ, ประเด็นหลัก', sent:'今天的重点是提高服务质量。', sentPy:'Jīntiān de zhòngdiǎn shì tígāo fúwù zhìliàng.', sentTh:'ประเด็นหลักวันนี้คือการยกระดับคุณภาพบริการ' },
+{ id:411, level:4, cat:'general', hanzi:'继续', pinyin:'jì xù', th:'ดำเนินต่อ, ทำต่อไป', sent:'休息十分钟，然后继续开会。', sentPy:'Xiūxi shí fēnzhōng, ránhòu jìxù kāihuì.', sentTh:'พักสิบนาที จากนั้นประชุมต่อ' },
+{ id:412, level:4, cat:'work', hanzi:'经验', pinyin:'jīng yàn', th:'ประสบการณ์', sent:'他有丰富的销售经验。', sentPy:'Tā yǒu fēngfù de xiāoshòu jīngyàn.', sentTh:'เขามีประสบการณ์ด้านการขายมากมาย' },
+{ id:413, level:4, cat:'work', hanzi:'机会', pinyin:'jī huì', th:'โอกาส', sent:'谢谢您给我这个机会。', sentPy:'Xièxie nín gěi wǒ zhège jīhuì.', sentTh:'ขอบคุณที่ให้โอกาสนี้กับฉัน' },
+{ id:414, level:4, cat:'work', hanzi:'能力', pinyin:'néng lì', th:'ความสามารถ', sent:'她的沟通能力很强。', sentPy:'Tā de gōutōng nénglì hěn qiáng.', sentTh:'ทักษะการสื่อสารของเธอแข็งแกร่งมาก' },
+{ id:415, level:4, cat:'general', hanzi:'顺利', pinyin:'shùn lì', th:'ราบรื่น', sent:'希望你们的工作一切顺利。', sentPy:'Xīwàng nǐmen de gōngzuò yīqiè shùnlì.', sentTh:'หวังว่างานของพวกคุณจะราบรื่นทุกอย่าง' },
+{ id:416, level:4, cat:'work', hanzi:'推迟', pinyin:'tuī chí', th:'เลื่อนออกไป', sent:'会议推迟到下星期三。', sentPy:'Huìyì tuīchí dào xià xīngqīsān.', sentTh:'การประชุมเลื่อนไปเป็นวันพุธหน้า' },
+{ id:417, level:4, cat:'work', hanzi:'准时', pinyin:'zhǔn shí', th:'ตรงเวลา', sent:'请大家准时参加培训。', sentPy:'Qǐng dàjiā zhǔnshí cānjiā péixùn.', sentTh:'ขอให้ทุกคนมาเข้าอบรมให้ตรงเวลา' },
+{ id:418, level:4, cat:'work', hanzi:'加班', pinyin:'jiā bān', th:'ทำงานล่วงเวลา (โอที)', sent:'今天晚上我要加班。', sentPy:'Jīntiān wǎnshang wǒ yào jiābān.', sentTh:'คืนนี้ฉันต้องทำโอที' },
+{ id:419, level:4, cat:'work', hanzi:'出差', pinyin:'chū chāi', th:'ไปทำงานต่างถิ่น/ต่างประเทศ', sent:'下周我要去上海出差。', sentPy:'Xià zhōu wǒ yào qù Shànghǎi chūchāi.', sentTh:'สัปดาห์หน้าฉันต้องไปทำงานที่เซี่ยงไฮ้' },
+{ id:420, level:4, cat:'communication', hanzi:'道歉', pinyin:'dào qiàn', th:'ขอโทษ, กล่าวคำขอโทษ', sent:'我为这次的错误向您道歉。', sentPy:'Wǒ wèi zhè cì de cuòwù xiàng nín dàoqiàn.', sentTh:'ฉันขอโทษสำหรับความผิดพลาดครั้งนี้' },
+{ id:421, level:4, cat:'communication', hanzi:'感谢', pinyin:'gǎn xiè', th:'ขอบคุณ, ซาบซึ้ง', sent:'非常感谢您的帮助。', sentPy:'Fēicháng gǎnxiè nín de bāngzhù.', sentTh:'ขอบคุณมากสำหรับความช่วยเหลือของคุณ' },
+{ id:422, level:4, cat:'general', hanzi:'原因', pinyin:'yuán yīn', th:'สาเหตุ', sent:'请说明迟到的原因。', sentPy:'Qǐng shuōmíng chídào de yuányīn.', sentTh:'กรุณาชี้แจงสาเหตุที่มาสาย' },
+{ id:423, level:4, cat:'general', hanzi:'结果', pinyin:'jié guǒ', th:'ผลลัพธ์', sent:'调查的结果下周出来。', sentPy:'Diàochá de jiéguǒ xià zhōu chūlái.', sentTh:'ผลการสำรวจจะออกสัปดาห์หน้า' },
+{ id:424, level:4, cat:'study', hanzi:'坚持', pinyin:'jiān chí', th:'ยืนหยัด, ทำอย่างต่อเนื่อง', sent:'坚持每天说一句中文。', sentPy:'Jiānchí měi tiān shuō yī jù Zhōngwén.', sentTh:'ยืนหยัดพูดภาษาจีนให้ได้วันละหนึ่งประโยค' },
+{ id:425, level:4, cat:'emotion', hanzi:'自信', pinyin:'zì xìn', th:'มั่นใจในตัวเอง', sent:'说中文的时候要自信一点。', sentPy:'Shuō Zhōngwén de shíhou yào zìxìn yīdiǎn.', sentTh:'ตอนพูดภาษาจีนต้องมั่นใจขึ้นอีกนิด' },
+{ id:426, level:4, cat:'emotion', hanzi:'紧张', pinyin:'jǐn zhāng', th:'ประหม่า, ตึงเครียด', sent:'第一次开会，我有点儿紧张。', sentPy:'Dì yī cì kāihuì, wǒ yǒudiǎnr jǐnzhāng.', sentTh:'ประชุมครั้งแรก ฉันประหม่านิดหน่อย' },
+{ id:427, level:4, cat:'emotion', hanzi:'轻松', pinyin:'qīng sōng', th:'ผ่อนคลาย, สบาย ๆ', sent:'今天的工作比较轻松。', sentPy:'Jīntiān de gōngzuò bǐjiào qīngsōng.', sentTh:'งานวันนี้ค่อนข้างสบาย' },
+{ id:428, level:4, cat:'transportation', hanzi:'堵车', pinyin:'dǔ chē', th:'รถติด', sent:'上班时间经常堵车。', sentPy:'Shàngbān shíjiān jīngcháng dǔchē.', sentTh:'ช่วงเวลาเข้างานรถติดบ่อย' },
+{ id:429, level:4, cat:'transportation', hanzi:'签证', pinyin:'qiān zhèng', th:'วีซ่า', sent:'去中国以前要办签证。', sentPy:'Qù Zhōngguó yǐqián yào bàn qiānzhèng.', sentTh:'ก่อนไปจีนต้องทำวีซ่า' },
+{ id:430, level:4, cat:'transportation', hanzi:'地址', pinyin:'dì zhǐ', th:'ที่อยู่', sent:'请把公司的地址发给我。', sentPy:'Qǐng bǎ gōngsī de dìzhǐ fā gěi wǒ.', sentTh:'ช่วยส่งที่อยู่บริษัทมาให้ฉันหน่อย' },
+
+/* ---------------- HSK 5 ---------------- */
+{ id:501, level:5, cat:'communication', hanzi:'沟通', pinyin:'gōu tōng', th:'สื่อสาร, แลกเปลี่ยนความคิดเห็น', sent:'双方需要多沟通才能解决问题。', sentPy:'Shuāngfāng xūyào duō gōutōng cái néng jiějué wèntí.', sentTh:'ทั้งสองฝ่ายต้องสื่อสารกันให้มากจึงจะแก้ปัญหาได้' },
+{ id:502, level:5, cat:'communication', hanzi:'表达', pinyin:'biǎo dá', th:'แสดงออก (ความรู้สึก/ความคิด)', sent:'他用微笑表达对大家的感谢。', sentPy:'Tā yòng wēixiào biǎodá duì dàjiā de gǎnxiè.', sentTh:'เขาส่งยิ้มเพื่อแสดงความขอบคุณต่อทุกคน' },
+{ id:503, level:5, cat:'communication', hanzi:'交流', pinyin:'jiāo liú', th:'แลกเปลี่ยน (ประสบการณ์/วัฒนธรรม)', sent:'语言是文化交流的桥梁。', sentPy:'Yǔyán shì wénhuà jiāoliú de qiáoliáng.', sentTh:'ภาษาคือสะพานเชื่อมการแลกเปลี่ยนทางวัฒนธรรม' },
+{ id:504, level:5, cat:'communication', hanzi:'解释', pinyin:'jiě shì', th:'อธิบาย, คำอธิบาย', sent:'请允许我向您解释一下这个情况。', sentPy:'Qǐng yǔnxǔ wǒ xiàng nín jiěshì yīxià zhège qíngkuàng.', sentTh:'โปรดอนุญาตให้ฉันอธิบายสถานการณ์นี้ให้คุณฟัง' },
+{ id:505, level:5, cat:'communication', hanzi:'确认', pinyin:'què rèn', th:'ยืนยัน (ข้อมูล/นัดหมาย)', sent:'请与客户确认一下开会时间。', sentPy:'Qǐng yǔ kèhù quèrèn yīxià kāihuì shíjiān.', sentTh:'กรุณายืนยันเวลาประชุมกับลูกค้าอีกครั้ง' },
+{ id:506, level:5, cat:'communication', hanzi:'提醒', pinyin:'tí xǐng', th:'เตือน, สะกิดใจ', sent:'谢谢你提醒我，我差点忘了。', sentPy:'Xièxie nǐ tíxǐng wǒ, wǒ chàdiǎn wàng le.', sentTh:'ขอบคุณที่ช่วยเตือนฉัน ฉันเกือบลืมไปแล้ว' },
+{ id:507, level:5, cat:'communication', hanzi:'邀请', pinyin:'yāo qǐng', th:'เชิญชวน, คำเชิญ', sent:'我很荣幸接受您的邀请。', sentPy:'Wǒ hěn róngxìng jiēshòu nín de yāoqǐng.', sentTh:'ฉันรู้สึกเป็นเกียรติมากที่ได้รับคำเชิญของคุณ' },
+{ id:508, level:5, cat:'communication', hanzi:'建议', pinyin:'jiàn yì', th:'ข้อเสนอแนะ, แนะนำ', sent:'你的建议非常有建设性。', sentPy:'Nǐ de jiànyì fēicháng yǒu jiànshèxìng.', sentTh:'คำแนะนำของคุณมีประโยชน์และสร้างสรรค์มาก' },
+{ id:509, level:5, cat:'communication', hanzi:'礼貌', pinyin:'lǐ mào', th:'มารยาท, มีมารยาท', sent:'说话客气是一种礼貌。', sentPy:'Shuōhuà kèqì shì yī zhǒng lǐmào.', sentTh:'การพูดจาสุภาพเป็นมารยาทอย่างหนึ่ง' },
+{ id:510, level:5, cat:'communication', hanzi:'抱怨', pinyin:'bào yuàn', th:'บ่น, ติติง', sent:'与其抱怨，不如积极解决问题。', sentPy:'Yǔqí bàoyuàn, bùrú jījí jiějué wèntí.', sentTh:'แทนที่จะเอาแต่บ่น สู้เร่งแก้ปัญหาดีกว่า' },
+{ id:511, level:5, cat:'communication', hanzi:'赞成', pinyin:'zàn chéng', th:'เห็นด้วย, สนับสนุน', sent:'大家都非常赞成这个方案。', sentPy:'Dàjiā dōu fēicháng zànchéng zhège fāng\'àn.', sentTh:'ทุกคนเห็นด้วยกับแผนงานนี้มาก' },
+{ id:512, level:5, cat:'transportation', hanzi:'交通', pinyin:'jiāo tōng', th:'การคมนาคม, การจราจร', sent:'上下班高峰期交通非常拥挤。', sentPy:'Shàng xiàbān gāofēngqī jiāotōng fēicháng yōngjǐ.', sentTh:'ช่วงเวลาเร่งด่วนการจราจรติดขัดมาก' },
+{ id:513, level:5, cat:'transportation', hanzi:'运输', pinyin:'yùn shū', th:'ขนส่ง, การลำเลียง', sent:'这批货物将通过海运运输。', sentPy:'Zhè pī huòwù jiāng tōngguò hǎiyùn yùnshū.', sentTh:'สินค้าล็อตนี้จะถูกขนส่งทางเรือ' },
+{ id:514, level:5, cat:'transportation', hanzi:'预订', pinyin:'yù dìng', th:'จองล่วงหน้า (ตั๋ว/โรงแรม)', sent:'我已经预订了明天的机票。', sentPy:'Wǒ yǐjīng yùdìng le míngtiān de jīpiào.', sentTh:'ฉันจองตั๋วเครื่องบินสำหรับพรุ่งนี้เรียบร้อยแล้ว' },
+{ id:515, level:5, cat:'transportation', hanzi:'航班', pinyin:'háng bān', th:'เที่ยวบิน', sent:'请问飞往北京的航班起飞了吗？', sentPy:'Qǐngwèn fēi wǎng Běijīng de hángbān qǐfēi le ma?', sentTh:'ขอถามหน่อยครับ เที่ยวบินไปปักกิ่งออกเดินทางหรือยัง' },
+{ id:516, level:5, cat:'transportation', hanzi:'登机牌', pinyin:'dēng jī pái', th:'บัตรขึ้นเครื่อง', sent:'请出示您的护照和登机牌。', sentPy:'Qǐng chūshì nín de hùzhào hé dēngjīpái.', sentTh:'โปรดแสดงหนังสือเดินทางและบัตรขึ้นเครื่องของคุณ' },
+{ id:517, level:5, cat:'transportation', hanzi:'托运', pinyin:'tuō yùn', th:'โหลดสัมภาระ, ฝากส่งสินค้า', sent:'请问您有需要托运的行李吗？', sentPy:'Qǐngwèn nín yǒu xūyào tuōyùn de xíngli ma?', sentTh:'ไม่ทราบว่าคุณมีสัมภาระที่ต้องโหลดใต้ท้องเครื่องไหม' },
+{ id:518, level:5, cat:'transportation', hanzi:'延误', pinyin:'yán wù', th:'ล่าช้า, ดีเลย์', sent:'由于天气原因，航班延误了。', sentPy:'Yóuyú tiānqì yuányīn, hángbān yánwù le.', sentTh:'เที่ยวบินล่าช้าเนื่องจากสภาพอากาศ' },
+{ id:519, level:5, cat:'transportation', hanzi:'高速公路', pinyin:'gāo sù gōng lù', th:'ทางด่วน, ทางหลวงพิเศษ', sent:'走高速公路能节省半个小时。', sentPy:'Zǒu gāosù gōnglù néng jiéshěng bàn gè xiǎoshí.', sentTh:'ใช้ทางด่วนจะช่วยประหยัดเวลาได้ครึ่งชั่วโมง' },
+{ id:520, level:5, cat:'transportation', hanzi:'执照', pinyin:'zhí zhào', th:'ใบอนุญาต (เช่น ใบขับขี่)', sent:'开汽车必须考取驾驶执照。', sentPy:'Kāi qìchē bìxū kǎoqǔ jiàshǐ zhízhào.', sentTh:'การขับรถยนต์จำเป็นต้องสอบใบขับขี่ให้ผ่าน' },
+{ id:521, level:5, cat:'general', hanzi:'积极', pinyin:'jī jí', th:'เชิงบวก, กระตือรือร้น', sent:'我们应该保持积极的态度。', sentPy:'Wǒmen yīnggāi bǎochí jījí de tàidù.', sentTh:'พวกเราควรรักษาทัศนคติเชิงบวกไว้' },
+{ id:522, level:5, cat:'general', hanzi:'复杂', pinyin:'fù zá', th:'ซับซ้อน', sent:'这个问题比我想象的要复杂。', sentPy:'Zhège wèntí bǐ wǒ xiǎngxiàng de yào fùzá.', sentTh:'ปัญหานี้ซับซ้อนกว่าที่ฉันคิดไว้' },
+{ id:523, level:5, cat:'general', hanzi:'获得', pinyin:'huò dé', th:'ได้รับ, ได้มา', sent:'他获得了这次比赛的冠军。', sentPy:'Tā huòdé le zhè cì bǐsài de guànjūn.', sentTh:'เขาได้รับรางวัลชนะเลิศของการแข่งขันครั้งนี้' },
+{ id:524, level:5, cat:'general', hanzi:'严格', pinyin:'yán gé', th:'เข้มงวด, กวดขัน', sent:'老师对我们的要求非常严格。', sentPy:'Lǎoshī duì wǒmen de yāoqiú fēicháng yángé.', sentTh:'คุณครูเข้มงวดกับพวกเรามาก' },
+{ id:525, level:5, cat:'general', hanzi:'效果', pinyin:'xiào guǒ', th:'ประสิทธิผล, ผลลัพธ์', sent:'这种新方法的效果很好。', sentPy:'Zhè zhǒng xīn fāngfǎ de xiàoguǒ hěn hǎo.', sentTh:'วิธีใหม่แบบนี้ให้ผลลัพธ์ที่ดีมาก' },
+{ id:526, level:5, cat:'work', hanzi:'效率', pinyin:'xiào lǜ', th:'ประสิทธิภาพ', sent:'用这个方法可以提高工作效率。', sentPy:'Yòng zhège fāngfǎ kěyǐ tígāo gōngzuò xiàolǜ.', sentTh:'ใช้วิธีนี้ช่วยเพิ่มประสิทธิภาพการทำงานได้' },
+{ id:527, level:5, cat:'work', hanzi:'配合', pinyin:'pèi hé', th:'ร่วมมือ, ประสานงาน', sent:'谢谢各部门的配合。', sentPy:'Xièxie gè bùmén de pèihé.', sentTh:'ขอบคุณทุกแผนกที่ให้ความร่วมมือ' },
+{ id:528, level:5, cat:'work', hanzi:'汇报', pinyin:'huì bào', th:'รายงาน (ต่อผู้ใหญ่)', sent:'我下午向经理汇报进度。', sentPy:'Wǒ xiàwǔ xiàng jīnglǐ huìbào jìndù.', sentTh:'ตอนบ่ายฉันจะรายงานความคืบหน้าต่อผู้จัดการ' },
+{ id:529, level:5, cat:'work', hanzi:'表扬', pinyin:'biǎo yáng', th:'ชมเชย, ยกย่อง', sent:'经理在会上表扬了我们组。', sentPy:'Jīnglǐ zài huì shàng biǎoyáng le wǒmen zǔ.', sentTh:'ผู้จัดการชมทีมของเราในที่ประชุม' },
+{ id:530, level:5, cat:'work', hanzi:'主动', pinyin:'zhǔ dòng', th:'ริเริ่มด้วยตัวเอง', sent:'他总是主动帮助新同事。', sentPy:'Tā zǒngshì zhǔdòng bāngzhù xīn tóngshì.', sentTh:'เขาเสนอตัวช่วยเพื่อนร่วมงานใหม่เสมอ' },
+{ id:531, level:5, cat:'emotion', hanzi:'耐心', pinyin:'nài xīn', th:'ความอดทน, ใจเย็น', sent:'老师很有耐心地纠正我的发音。', sentPy:'Lǎoshī hěn yǒu nàixīn de jiūzhèng wǒ de fāyīn.', sentTh:'คุณครูแก้การออกเสียงให้ฉันอย่างใจเย็น' },
+{ id:532, level:5, cat:'work', hanzi:'临时', pinyin:'lín shí', th:'กะทันหัน, ชั่วคราว', sent:'经理临时决定提前开会。', sentPy:'Jīnglǐ línshí juédìng tíqián kāihuì.', sentTh:'ผู้จัดการตัดสินใจกะทันหันให้ประชุมเร็วขึ้น' },
+{ id:533, level:5, cat:'work', hanzi:'及时', pinyin:'jí shí', th:'ทันเวลา, ทันท่วงที', sent:'谢谢你及时提醒我。', sentPy:'Xièxie nǐ jíshí tíxǐng wǒ.', sentTh:'ขอบคุณที่เตือนฉันได้ทันเวลา' },
+{ id:534, level:5, cat:'work', hanzi:'谈判', pinyin:'tán pàn', th:'เจรจา, การเจรจาต่อรอง', sent:'这次谈判进行得很顺利。', sentPy:'Zhè cì tánpàn jìnxíng de hěn shùnlì.', sentTh:'การเจรจาครั้งนี้ดำเนินไปอย่างราบรื่น' },
+{ id:535, level:5, cat:'general', hanzi:'竞争', pinyin:'jìng zhēng', th:'แข่งขัน, การแข่งขัน', sent:'市场竞争越来越激烈。', sentPy:'Shìchǎng jìngzhēng yuè lái yuè jīliè.', sentTh:'การแข่งขันในตลาดดุเดือดขึ้นเรื่อย ๆ' }
+];
+
+</script>
+<script>
+/* ============================================================
+   รูปประโยค (句型) HSK 3-5
+   ============================================================ */
+const PATTERN_SEED = [
+{ id:'p01', level:3, pattern:'因为…所以…', pinyin:'yīnwèi … suǒyǐ …', th:'เพราะว่า… จึง…',
+  use:'บอกเหตุและผล ประโยคหน้าเป็นเหตุ ประโยคหลังเป็นผล',
+  sent:'因为路上堵车，所以我迟到了。', sentPy:'Yīnwèi lùshang dǔchē, suǒyǐ wǒ chídào le.', sentTh:'เพราะรถติดระหว่างทาง ฉันจึงมาสาย',
+  blank:'___路上堵车，___我迟到了。', answers:['因为','所以'] },
+{ id:'p02', level:3, pattern:'虽然…但是…', pinyin:'suīrán … dànshì …', th:'ถึงแม้ว่า… แต่…',
+  use:'ขัดแย้งกัน ยอมรับข้อหนึ่งแต่ผลออกมาอีกอย่าง',
+  sent:'虽然工作很忙，但是我很开心。', sentPy:'Suīrán gōngzuò hěn máng, dànshì wǒ hěn kāixīn.', sentTh:'ถึงแม้งานจะยุ่งมาก แต่ฉันก็มีความสุข',
+  blank:'___工作很忙，___我很开心。', answers:['虽然','但是'] },
+{ id:'p03', level:3, pattern:'一边…一边…', pinyin:'yībiān … yībiān …', th:'…ไปด้วย …ไปด้วย',
+  use:'ทำสองอย่างพร้อมกัน',
+  sent:'他一边喝咖啡，一边看报告。', sentPy:'Tā yībiān hē kāfēi, yībiān kàn bàogào.', sentTh:'เขาดื่มกาแฟไปด้วยอ่านรายงานไปด้วย',
+  blank:'他___喝咖啡，___看报告。', answers:['一边','一边'] },
+{ id:'p04', level:3, pattern:'先…然后…', pinyin:'xiān … ránhòu …', th:'…ก่อน จากนั้นจึง…',
+  use:'เรียงลำดับขั้นตอน',
+  sent:'我先打电话，然后发邮件。', sentPy:'Wǒ xiān dǎ diànhuà, ránhòu fā yóujiàn.', sentTh:'ฉันโทรศัพท์ก่อน จากนั้นค่อยส่งอีเมล',
+  blank:'我___打电话，___发邮件。', answers:['先','然后'] },
+{ id:'p05', level:3, pattern:'如果…就…', pinyin:'rúguǒ … jiù …', th:'ถ้าหาก… ก็…',
+  use:'สมมติเงื่อนไข',
+  sent:'如果你有问题，就来找我。', sentPy:'Rúguǒ nǐ yǒu wèntí, jiù lái zhǎo wǒ.', sentTh:'ถ้าคุณมีปัญหา ก็มาหาฉันได้',
+  blank:'___你有问题，___来找我。', answers:['如果','就'] },
+{ id:'p06', level:3, pattern:'越来越…', pinyin:'yuè lái yuè …', th:'…ขึ้นเรื่อย ๆ',
+  use:'บอกว่าสภาพเปลี่ยนไปมากขึ้นตามเวลา',
+  sent:'我的中文越来越好了。', sentPy:'Wǒ de Zhōngwén yuè lái yuè hǎo le.', sentTh:'ภาษาจีนของฉันดีขึ้นเรื่อย ๆ แล้ว',
+  blank:'我的中文___好了。', answers:['越来越'] },
+{ id:'p07', level:4, pattern:'不但…而且…', pinyin:'bùdàn … érqiě …', th:'ไม่เพียงแต่… แต่ยัง…',
+  use:'เสริมข้อดีขึ้นอีกชั้น',
+  sent:'他不但会说中文，而且说得很流利。', sentPy:'Tā bùdàn huì shuō Zhōngwén, érqiě shuō de hěn liúlì.', sentTh:'เขาไม่เพียงพูดจีนได้ แต่ยังพูดได้คล่องมาก',
+  blank:'他___会说中文，___说得很流利。', answers:['不但','而且'] },
+{ id:'p08', level:4, pattern:'只要…就…', pinyin:'zhǐyào … jiù …', th:'ขอแค่… ก็…',
+  use:'เงื่อนไขขั้นต่ำที่พอเพียง',
+  sent:'只要每天练习，就一定会进步。', sentPy:'Zhǐyào měi tiān liànxí, jiù yīdìng huì jìnbù.', sentTh:'ขอแค่ฝึกทุกวัน ก็ต้องเก่งขึ้นแน่นอน',
+  blank:'___每天练习，___一定会进步。', answers:['只要','就'] },
+{ id:'p09', level:4, pattern:'除了…以外，还…', pinyin:'chúle … yǐwài, hái …', th:'นอกจาก… แล้ว ยัง…',
+  use:'เพิ่มสิ่งอื่นเข้ามาด้วย',
+  sent:'除了中文以外，他还会说日语。', sentPy:'Chúle Zhōngwén yǐwài, tā hái huì shuō Rìyǔ.', sentTh:'นอกจากภาษาจีนแล้ว เขายังพูดภาษาญี่ปุ่นได้ด้วย',
+  blank:'___中文以外，他___会说日语。', answers:['除了','还'] },
+{ id:'p10', level:4, pattern:'把 + สิ่งของ + กริยา', pinyin:'bǎ …', th:'ประโยค 把 เน้นว่าจัดการกับสิ่งนั้นอย่างไร',
+  use:'ใช้เมื่อต้องการบอกว่าทำอะไรกับสิ่งของจนเกิดผล',
+  sent:'请把文件发给经理。', sentPy:'Qǐng bǎ wénjiàn fā gěi jīnglǐ.', sentTh:'กรุณาส่งเอกสารให้ผู้จัดการ',
+  blank:'请___文件发给经理。', answers:['把'] },
+{ id:'p11', level:4, pattern:'被 + ผู้กระทำ + กริยา', pinyin:'bèi …', th:'ประโยคถูกกระทำ (passive)',
+  use:'เน้นว่าประธานถูกทำอะไร',
+  sent:'我的邮件被退回来了。', sentPy:'Wǒ de yóujiàn bèi tuì huílái le.', sentTh:'อีเมลของฉันถูกตีกลับมา',
+  blank:'我的邮件___退回来了。', answers:['被'] },
+{ id:'p12', level:4, pattern:'对…来说', pinyin:'duì … lái shuō', th:'สำหรับ… แล้ว',
+  use:'บอกมุมมองของคนหรือกลุ่มหนึ่ง',
+  sent:'对我来说，发音是最难的部分。', sentPy:'Duì wǒ lái shuō, fāyīn shì zuì nán de bùfen.', sentTh:'สำหรับฉันแล้ว การออกเสียงคือส่วนที่ยากที่สุด',
+  blank:'___我___，发音是最难的部分。', answers:['对','来说'] },
+{ id:'p13', level:4, pattern:'一…就…', pinyin:'yī … jiù …', th:'พอ… ก็… (ทันที)',
+  use:'เหตุการณ์สองอย่างเกิดต่อกันทันที',
+  sent:'我一到公司就开始工作。', sentPy:'Wǒ yī dào gōngsī jiù kāishǐ gōngzuò.', sentTh:'พอฉันถึงบริษัทก็เริ่มทำงานทันที',
+  blank:'我___到公司___开始工作。', answers:['一','就'] },
+{ id:'p14', level:5, pattern:'既然…就…', pinyin:'jìrán … jiù …', th:'ในเมื่อ… ก็…',
+  use:'ยกสิ่งที่รู้กันอยู่แล้วมาเป็นเหตุผลในการสรุป',
+  sent:'既然大家都同意，就这么决定吧。', sentPy:'Jìrán dàjiā dōu tóngyì, jiù zhème juédìng ba.', sentTh:'ในเมื่อทุกคนเห็นด้วย ก็ตัดสินใจแบบนี้แหละ',
+  blank:'___大家都同意，___这么决定吧。', answers:['既然','就'] },
+{ id:'p15', level:5, pattern:'无论…都…', pinyin:'wúlùn … dōu …', th:'ไม่ว่าจะ… ก็…',
+  use:'ผลลัพธ์เหมือนเดิมไม่ว่าเงื่อนไขจะเป็นอย่างไร',
+  sent:'无论遇到什么问题，我们都一起解决。', sentPy:'Wúlùn yùdào shénme wèntí, wǒmen dōu yīqǐ jiějué.', sentTh:'ไม่ว่าจะเจอปัญหาอะไร พวกเราก็แก้ไขด้วยกัน',
+  blank:'___遇到什么问题，我们___一起解决。', answers:['无论','都'] },
+{ id:'p16', level:5, pattern:'连…都…', pinyin:'lián … dōu …', th:'แม้แต่… ก็…',
+  use:'ยกตัวอย่างสุดโต่งเพื่อเน้นย้ำ',
+  sent:'他连周末都在加班。', sentPy:'Tā lián zhōumò dōu zài jiābān.', sentTh:'เขาแม้แต่วันหยุดสุดสัปดาห์ก็ยังทำโอที',
+  blank:'他___周末___在加班。', answers:['连','都'] },
+{ id:'p17', level:5, pattern:'之所以…是因为…', pinyin:'zhīsuǒyǐ … shì yīnwèi …', th:'ที่… ก็เพราะว่า…',
+  use:'เอาผลขึ้นก่อนแล้วค่อยอธิบายเหตุ',
+  sent:'他之所以成功，是因为他非常努力。', sentPy:'Tā zhīsuǒyǐ chénggōng, shì yīnwèi tā fēicháng nǔlì.', sentTh:'ที่เขาประสบความสำเร็จ ก็เพราะเขาพยายามอย่างมาก',
+  blank:'他___成功，___他非常努力。', answers:['之所以','是因为'] },
+{ id:'p18', level:5, pattern:'与其…不如…', pinyin:'yǔqí … bùrú …', th:'แทนที่จะ… สู้… ดีกว่า',
+  use:'เปรียบเทียบสองทางเลือกแล้วเลือกทางหลัง',
+  sent:'与其抱怨，不如想办法解决。', sentPy:'Yǔqí bàoyuàn, bùrú xiǎng bànfǎ jiějué.', sentTh:'แทนที่จะเอาแต่บ่น สู้คิดวิธีแก้ดีกว่า',
+  blank:'___抱怨，___想办法解决。', answers:['与其','不如'] }
+];
+
+/* ============================================================
+   บทสนทนาในที่ทำงาน (มีสตอรี่ + ตัวละคร)
+   ============================================================ */
+const DIALOGUE_SEED = [
+{
+  id:'d1', level:3, title:'วันแรกของการทำงาน · แนะนำตัว', emoji:'🙋',
+  story:'มะลิ (茉莉) สาวไทยเพิ่งเข้าทำงานวันแรกที่บริษัทจีนในกรุงเทพฯ หลี่ผู้จัดการพาเธอไปแนะนำตัวกับเพื่อนร่วมงาน เธอตื่นเต้นมาก แต่ก็อยากทักทายให้ดีที่สุด',
+  goal:['แนะนำชื่อและตำแหน่งของตัวเองได้','ตอบรับคำทักทายอย่างสุภาพ','ขอความช่วยเหลือจากเพื่อนร่วมงาน'],
+  roles:[{key:'A', name:'茉莉 (มะลิ)', note:'พนักงานใหม่'},{key:'B', name:'李经理 (ผจก.หลี่)', note:'ผู้จัดการ'},{key:'C', name:'小王 (เสี่ยวหวัง)', note:'เพื่อนร่วมงาน'}],
+  lines:[
+    {r:'B', hz:'大家好，这是我们的新同事茉莉。', py:'Dàjiā hǎo, zhè shì wǒmen de xīn tóngshì Mòlì.', th:'สวัสดีทุกคน นี่คือเพื่อนร่วมงานใหม่ของเรา มะลิ'},
+    {r:'A', hz:'大家好！我叫茉莉，很高兴认识大家。', py:'Dàjiā hǎo! Wǒ jiào Mòlì, hěn gāoxìng rènshi dàjiā.', th:'สวัสดีทุกคนค่ะ ฉันชื่อมะลิ ยินดีที่ได้รู้จักค่ะ'},
+    {r:'C', hz:'欢迎你！你以前在哪儿工作？', py:'Huānyíng nǐ! Nǐ yǐqián zài nǎr gōngzuò?', th:'ยินดีต้อนรับ! ก่อนหน้านี้คุณทำงานที่ไหนมา'},
+    {r:'A', hz:'我以前在一家旅行社工作，做客服。', py:'Wǒ yǐqián zài yī jiā lǚxíngshè gōngzuò, zuò kèfú.', th:'ก่อนหน้านี้ฉันทำงานที่บริษัททัวร์ ทำฝ่ายบริการลูกค้าค่ะ'},
+    {r:'B', hz:'很好。以后你负责跟客人联系。', py:'Hěn hǎo. Yǐhòu nǐ fùzé gēn kèrén liánxì.', th:'ดีมาก ต่อไปคุณรับผิดชอบการติดต่อกับลูกค้านะ'},
+    {r:'A', hz:'好的，我会认真学习。有问题可以问您吗？', py:'Hǎo de, wǒ huì rènzhēn xuéxí. Yǒu wèntí kěyǐ wèn nín ma?', th:'ได้ค่ะ ฉันจะตั้งใจเรียนรู้ มีปัญหาถามคุณได้ไหมคะ'},
+    {r:'C', hz:'当然可以！遇到问题随时找我帮忙。', py:'Dāngrán kěyǐ! Yùdào wèntí suíshí zhǎo wǒ bāngmáng.', th:'ได้สิ! เจอปัญหาเมื่อไหร่มาให้ฉันช่วยได้ตลอด'},
+    {r:'A', hz:'太感谢了，我有点儿紧张，但是很开心。', py:'Tài gǎnxiè le, wǒ yǒudiǎnr jǐnzhāng, dànshì hěn kāixīn.', th:'ขอบคุณมากค่ะ ฉันประหม่านิดหน่อย แต่ก็ดีใจมาก'},
+    {r:'B', hz:'别担心，慢慢来，大家都会帮你的。', py:'Bié dānxīn, mànmàn lái, dàjiā dōu huì bāng nǐ de.', th:'ไม่ต้องกังวล ค่อยเป็นค่อยไป ทุกคนจะช่วยคุณเอง'}
+  ],
+  phrases:[{hz:'很高兴认识大家',py:'Hěn gāoxìng rènshi dàjiā',th:'ยินดีที่ได้รู้จักทุกคน'},{hz:'请多关照',py:'Qǐng duō guānzhào',th:'ฝากเนื้อฝากตัวด้วยนะคะ'},{hz:'当然可以',py:'Dāngrán kěyǐ',th:'ได้เลย / ได้แน่นอน'},{hz:'慢慢来',py:'Màn màn lái',th:'ค่อยเป็นค่อยไป ไม่ต้องรีบ'}],
+  keyWords:['同事','经理','负责','帮忙','紧张','担心']
+},
+{
+  id:'d2', level:3, title:'รับโทรศัพท์และโอนสาย', emoji:'📞',
+  story:'ลูกค้าคุณจางโทรเข้ามาที่บริษัทเพื่อขอคุยกับผู้จัดการหลี่ แต่ผู้จัดการติดประชุมอยู่ พนักงานต้อนรับเสี่ยวเฉินต้องรับเรื่องและจดข้อความไว้ให้',
+  goal:['รับสายอย่างสุภาพ','บอกว่าอีกฝ่ายไม่สะดวกตอนนี้','รับฝากข้อความและทวนข้อมูลให้ถูกต้อง'],
+  roles:[{key:'A', name:'小陈 (เสี่ยวเฉิน)', note:'พนักงานต้อนรับ'},{key:'B', name:'张先生 (คุณจาง)', note:'ลูกค้า'}],
+  lines:[
+    {r:'A', hz:'您好，这里是泰华公司，请问您找哪位？', py:'Nín hǎo, zhèlǐ shì Tàihuá gōngsī, qǐngwèn nín zhǎo nǎ wèi?', th:'สวัสดีค่ะ ที่นี่บริษัทไท่หัว ไม่ทราบว่าต้องการติดต่อท่านใดคะ'},
+    {r:'B', hz:'你好，我找李经理，我姓张。', py:'Nǐ hǎo, wǒ zhǎo Lǐ jīnglǐ, wǒ xìng Zhāng.', th:'สวัสดีครับ ผมขอสายผู้จัดการหลี่ ผมแซ่จางครับ'},
+    {r:'A', hz:'不好意思，李经理正在开会，请稍等一下。', py:'Bù hǎoyìsi, Lǐ jīnglǐ zhèngzài kāihuì, qǐng shāo děng yīxià.', th:'ขอโทษค่ะ ผู้จัดการหลี่กำลังประชุมอยู่ กรุณารอสักครู่'},
+    {r:'B', hz:'没关系，那我晚点儿再打吧。', py:'Méi guānxi, nà wǒ wǎn diǎnr zài dǎ ba.', th:'ไม่เป็นไรครับ งั้นผมโทรมาใหม่ทีหลังก็ได้'},
+    {r:'A', hz:'我可以帮您留个话，让他给您回电话。', py:'Wǒ kěyǐ bāng nín liú gè huà, ràng tā gěi nín huí diànhuà.', th:'ฉันรับฝากข้อความให้ได้ค่ะ แล้วให้เขาโทรกลับไป'},
+    {r:'B', hz:'好，麻烦你告诉他，明天的会议推迟到三点。', py:'Hǎo, máfan nǐ gàosu tā, míngtiān de huìyì tuīchí dào sān diǎn.', th:'ดีครับ รบกวนบอกเขาด้วยว่าประชุมพรุ่งนี้เลื่อนไปบ่ายสาม'},
+    {r:'A', hz:'我确认一下：明天的会议改到下午三点，对吗？', py:'Wǒ quèrèn yīxià: míngtiān de huìyì gǎi dào xiàwǔ sān diǎn, duì ma?', th:'ขอทวนนะคะ ประชุมพรุ่งนี้เปลี่ยนเป็นบ่ายสามโมง ถูกไหมคะ'},
+    {r:'B', hz:'对，谢谢你！', py:'Duì, xièxie nǐ!', th:'ใช่ครับ ขอบคุณครับ'},
+    {r:'A', hz:'不客气，我会马上通知他。再见！', py:'Bù kèqi, wǒ huì mǎshàng tōngzhī tā. Zàijiàn!', th:'ไม่เป็นไรค่ะ ฉันจะแจ้งเขาทันที สวัสดีค่ะ'}
+  ],
+  phrases:[{hz:'请稍等一下',py:'Qǐng shāo děng yīxià',th:'กรุณารอสักครู่'},{hz:'我帮您留个话',py:'Wǒ bāng nín liú gè huà',th:'ฉันรับฝากข้อความให้นะคะ'},{hz:'麻烦你',py:'Máfan nǐ',th:'รบกวนคุณ...'},{hz:'回电话',py:'huí diànhuà',th:'โทรกลับ'},{hz:'不客气',py:'Bù kèqi',th:'ไม่เป็นไรค่ะ / ยินดีค่ะ'}],
+  keyWords:['会议','推迟','确认','通知','经理']
+},
+{
+  id:'d3', level:4, title:'นัดเวลาประชุมกับทีม', emoji:'📅',
+  story:'อานันต์ต้องนัดประชุมทีมเรื่องแผนไตรมาสใหม่ แต่แต่ละคนมีตารางไม่ตรงกัน เขาต้องคุยกับเสี่ยวหลิน ผู้ช่วย เพื่อหาเวลาที่ทุกคนสะดวก',
+  goal:['เสนอเวลาและถามความสะดวก','ต่อรองเวลาใหม่เมื่ออีกฝ่ายไม่ว่าง','สรุปและยืนยันนัดหมาย'],
+  roles:[{key:'A', name:'阿南 (อานันต์)', note:'หัวหน้าทีม'},{key:'B', name:'小林 (เสี่ยวหลิน)', note:'ผู้ช่วย'}],
+  lines:[
+    {r:'A', hz:'小林，我想安排一个会议，讨论下个季度的计划。', py:'Xiǎo Lín, wǒ xiǎng ānpái yī gè huìyì, tǎolùn xià gè jìdù de jìhuà.', th:'เสี่ยวหลิน ฉันอยากนัดประชุมหารือแผนไตรมาสหน้า'},
+    {r:'B', hz:'好的，您希望什么时候开？', py:'Hǎo de, nín xīwàng shénme shíhou kāi?', th:'ได้ค่ะ คุณอยากประชุมเมื่อไหร่คะ'},
+    {r:'A', hz:'星期二上午十点怎么样？', py:'Xīngqī\'èr shàngwǔ shí diǎn zěnmeyàng?', th:'วันอังคารสิบโมงเช้าเป็นไง'},
+    {r:'B', hz:'不好意思，那天王经理要出差，恐怕来不了。', py:'Bù hǎoyìsi, nà tiān Wáng jīnglǐ yào chūchāi, kǒngpà lái bù liǎo.', th:'ขอโทษค่ะ วันนั้นผู้จัดการหวังต้องไปต่างจังหวัด คงมาไม่ได้'},
+    {r:'A', hz:'那就推迟到星期三下午两点吧。', py:'Nà jiù tuīchí dào xīngqīsān xiàwǔ liǎng diǎn ba.', th:'งั้นเลื่อนไปวันพุธบ่ายสองโมงแล้วกัน'},
+    {r:'B', hz:'星期三下午大家都有空，没问题。', py:'Xīngqīsān xiàwǔ dàjiā dōu yǒu kòng, méi wèntí.', th:'วันพุธบ่ายทุกคนว่างค่ะ ไม่มีปัญหา'},
+    {r:'A', hz:'麻烦你通知大家，并且把会议内容发给他们。', py:'Máfan nǐ tōngzhī dàjiā, bìngqiě bǎ huìyì nèiróng fā gěi tāmen.', th:'รบกวนแจ้งทุกคน แล้วส่งเนื้อหาการประชุมให้พวกเขาด้วย'},
+    {r:'B', hz:'好的，我现在就发邮件，请大家准时参加。', py:'Hǎo de, wǒ xiànzài jiù fā yóujiàn, qǐng dàjiā zhǔnshí cānjiā.', th:'ได้ค่ะ ฉันจะส่งอีเมลเดี๋ยวนี้ ขอให้ทุกคนมาตรงเวลา'},
+    {r:'A', hz:'谢谢你，辛苦了。', py:'Xièxie nǐ, xīnkǔ le.', th:'ขอบคุณนะ เหนื่อยหน่อยนะ'}
+  ],
+  phrases:[{hz:'什么时候',py:'shénme shíhou',th:'เมื่อไหร่'},{hz:'怎么样？',py:'Zěnmeyàng?',th:'เป็นอย่างไร / ดีไหม'},{hz:'有空',py:'yǒu kòng',th:'ว่าง (มีเวลา)'},{hz:'没问题',py:'Méi wèntí',th:'ไม่มีปัญหา'},{hz:'辛苦了',py:'Xīnkǔ le',th:'เหนื่อยหน่อยนะ (คำให้กำลังใจเพื่อนร่วมงาน)'}],
+  keyWords:['安排','讨论','推迟','通知','内容','准时','出差']
+},
+{
+  id:'d4', level:4, title:'ขอลางานและส่งต่องาน', emoji:'📝',
+  story:'เมย์มีนัดหมอกะทันหันและต้องลาหนึ่งวัน เธอต้องแจ้งผู้จัดการ อธิบายเหตุผล และบอกว่าใครจะดูแลงานแทน',
+  goal:['ขอลาอย่างสุภาพพร้อมเหตุผล','เสนอแผนส่งต่องาน','รับปากติดตามงานหลังกลับมา'],
+  roles:[{key:'A', name:'阿May (เมย์)', note:'พนักงาน'},{key:'B', name:'周经理 (ผจก.โจว)', note:'ผู้จัดการ'}],
+  lines:[
+    {r:'A', hz:'周经理，打扰一下，我想请一天假。', py:'Zhōu jīnglǐ, dǎrǎo yīxià, wǒ xiǎng qǐng yī tiān jià.', th:'ผู้จัดการโจวคะ ขอรบกวนสักครู่ ฉันอยากขอลาหนึ่งวันค่ะ'},
+    {r:'B', hz:'什么原因呢？哪一天？', py:'Shénme yuányīn ne? Nǎ yī tiān?', th:'เพราะอะไรล่ะ วันไหน'},
+    {r:'A', hz:'这个星期五，我要去医院做检查。', py:'Zhège xīngqīwǔ, wǒ yào qù yīyuàn zuò jiǎnchá.', th:'วันศุกร์นี้ค่ะ ฉันต้องไปตรวจที่โรงพยาบาล'},
+    {r:'B', hz:'那天你的工作怎么安排？', py:'Nà tiān nǐ de gōngzuò zěnme ānpái?', th:'วันนั้นงานของคุณจัดการยังไง'},
+    {r:'A', hz:'我已经把报告做完了，客户那边小李负责联系。', py:'Wǒ yǐjīng bǎ bàogào zuò wán le, kèhù nàbiān Xiǎo Lǐ fùzé liánxì.', th:'ฉันทำรายงานเสร็จแล้วค่ะ ฝั่งลูกค้าให้เสี่ยวหลี่รับผิดชอบติดต่อ'},
+    {r:'B', hz:'很好，你考虑得很周到。我同意。', py:'Hěn hǎo, nǐ kǎolǜ de hěn zhōudào. Wǒ tóngyì.', th:'ดีมาก คุณคิดรอบคอบดี ฉันอนุมัติ'},
+    {r:'A', hz:'非常感谢您。星期一我会把结果向您汇报。', py:'Fēicháng gǎnxiè nín. Xīngqīyī wǒ huì bǎ jiéguǒ xiàng nín huìbào.', th:'ขอบคุณมากค่ะ วันจันทร์ฉันจะรายงานผลให้ทราบ'},
+    {r:'B', hz:'好好休息，身体健康最重要。', py:'Hǎohāo xiūxi, shēntǐ jiànkāng zuì zhòngyào.', th:'พักผ่อนให้ดีนะ สุขภาพสำคัญที่สุด'},
+    {r:'A', hz:'谢谢经理，我会及时跟您联系。', py:'Xièxie jīnglǐ, wǒ huì jíshí gēn nín liánxì.', th:'ขอบคุณค่ะผู้จัดการ ฉันจะติดต่อคุณให้ทันเวลา'}
+  ],
+  phrases:[{hz:'打扰一下',py:'Dǎrǎo yīxià',th:'ขอรบกวนสักครู่'},{hz:'做检查',py:'zuò jiǎnchá',th:'ไปตรวจร่างกาย'},{hz:'考虑得很周到',py:'kǎolǜ de hěn zhōudào',th:'คิดรอบคอบมาก'},{hz:'好好休息',py:'Hǎohāo xiūxi',th:'พักผ่อนให้เต็มที่นะ'}],
+  keyWords:['请假','原因','安排','负责','同意','汇报','及时','健康']
+},
+{
+  id:'d5', level:5, title:'ยืนยันออเดอร์และการจัดส่งกับลูกค้า', emoji:'📦',
+  story:'เจ๊ะ พนักงานขาย ต้องโทรหาคุณหลิว ลูกค้าจากเซี่ยงไฮ้ เพื่อยืนยันจำนวนสินค้าและวิธีขนส่ง แต่มีข่าวร้ายคือเรือออกช้ากว่ากำหนด เขาต้องแจ้งอย่างสุภาพและเสนอทางแก้',
+  goal:['ยืนยันรายละเอียดออเดอร์','แจ้งข่าวความล่าช้าอย่างมืออาชีพ','เสนอทางเลือกและขอโทษอย่างเหมาะสม'],
+  roles:[{key:'A', name:'阿杰 (เจ๊ะ)', note:'ฝ่ายขาย'},{key:'B', name:'刘女士 (คุณหลิว)', note:'ลูกค้า'}],
+  lines:[
+    {r:'A', hz:'刘女士，您好。我想跟您确认一下这批货的数量。', py:'Liú nǚshì, nín hǎo. Wǒ xiǎng gēn nín quèrèn yīxià zhè pī huò de shùliàng.', th:'สวัสดีครับคุณหลิว ผมขอยืนยันจำนวนสินค้าล็อตนี้กับคุณหน่อยครับ'},
+    {r:'B', hz:'你好，一共是五百件，对吗？', py:'Nǐ hǎo, yīgòng shì wǔbǎi jiàn, duì ma?', th:'สวัสดีค่ะ ทั้งหมดห้าร้อยชิ้น ใช่ไหมคะ'},
+    {r:'A', hz:'对，五百件，通过海运运输，下周三发货。', py:'Duì, wǔbǎi jiàn, tōngguò hǎiyùn yùnshū, xià zhōusān fāhuò.', th:'ใช่ครับ ห้าร้อยชิ้น ขนส่งทางเรือ ส่งออกวันพุธหน้า'},
+    {r:'B', hz:'好的。不过我们月底以前必须收到货。', py:'Hǎo de. Bùguò wǒmen yuèdǐ yǐqián bìxū shōudào huò.', th:'ได้ค่ะ แต่เราต้องได้รับสินค้าก่อนสิ้นเดือนนะคะ'},
+    {r:'A', hz:'非常抱歉，由于天气原因，船期可能会延误两天。', py:'Fēicháng bàoqiàn, yóuyú tiānqì yuányīn, chuánqī kěnéng huì yánwù liǎng tiān.', th:'ขออภัยอย่างยิ่งครับ เนื่องจากสภาพอากาศ กำหนดเรืออาจล่าช้าสองวัน'},
+    {r:'B', hz:'这样啊……那有什么解决办法吗？', py:'Zhèyàng a…… Nà yǒu shénme jiějué bànfǎ ma?', th:'อย่างนี้นี่เอง… แล้วมีวิธีแก้ไขไหมคะ'},
+    {r:'A', hz:'我建议把一部分货改成空运，这样可以及时到达。', py:'Wǒ jiànyì bǎ yī bùfen huò gǎi chéng kōngyùn, zhèyàng kěyǐ jíshí dàodá.', th:'ผมเสนอให้เปลี่ยนสินค้าบางส่วนเป็นขนส่งทางอากาศ แบบนี้จะถึงทันเวลา'},
+    {r:'B', hz:'这个建议不错。费用方面怎么算？', py:'Zhège jiànyì bùcuò. Fèiyòng fāngmiàn zěnme suàn?', th:'ข้อเสนอนี้ดีนะ แล้วค่าใช้จ่ายคิดยังไงคะ'},
+    {r:'A', hz:'多出来的费用由我们公司承担，这是我们的责任。', py:'Duō chūlái de fèiyòng yóu wǒmen gōngsī chéngdān, zhè shì wǒmen de zérèn.', th:'ค่าใช้จ่ายส่วนเกินบริษัทเรารับผิดชอบครับ นี่คือความรับผิดชอบของเรา'},
+    {r:'B', hz:'谢谢你们的配合，那就这么办吧。', py:'Xièxie nǐmen de pèihé, nà jiù zhème bàn ba.', th:'ขอบคุณที่ให้ความร่วมมือนะคะ งั้นทำแบบนี้เลยค่ะ'}
+  ],
+  phrases:[{hz:'一共',py:'yīgòng',th:'ทั้งหมด, รวมเป็น'},{hz:'发货',py:'fāhuò',th:'ส่งสินค้าออก'},{hz:'非常抱歉',py:'Fēicháng bàoqiàn',th:'ขออภัยอย่างยิ่ง'},{hz:'由于天气原因',py:'Yóuyú tiānqì yuányīn',th:'เนื่องจากสาเหตุด้านสภาพอากาศ'},{hz:'空运',py:'kōngyùn',th:'ขนส่งทางอากาศ'},{hz:'那就这么办吧',py:'Nà jiù zhème bàn ba',th:'งั้นทำแบบนี้เลย'}],
+  keyWords:['确认','运输','延误','建议','及时','配合','解决']
+},
+{
+  id:'d6', level:5, title:'รายงานความคืบหน้าและเสนอความเห็น', emoji:'📊',
+  story:'เสี่ยวอู๋ต้องรายงานความคืบหน้าโครงการต่อผู้จัดการโจว งานล่าช้าไปเล็กน้อย เขาจึงต้องอธิบายสาเหตุอย่างตรงไปตรงมา พร้อมเสนอวิธีเพิ่มประสิทธิภาพให้ทีม',
+  goal:['รายงานความคืบหน้าอย่างเป็นระบบ','อธิบายปัญหาโดยไม่โทษใคร','เสนอความเห็นอย่างมั่นใจและสุภาพ'],
+  roles:[{key:'A', name:'小吴 (เสี่ยวอู๋)', note:'สมาชิกทีม'},{key:'B', name:'周经理 (ผจก.โจว)', note:'ผู้จัดการ'}],
+  lines:[
+    {r:'A', hz:'周经理，我来向您汇报一下项目的进度。', py:'Zhōu jīnglǐ, wǒ lái xiàng nín huìbào yīxià xiàngmù de jìndù.', th:'ผู้จัดการโจวครับ ผมมารายงานความคืบหน้าของโครงการครับ'},
+    {r:'B', hz:'好，现在完成了多少？', py:'Hǎo, xiànzài wánchéng le duōshao?', th:'ดี ตอนนี้เสร็จไปเท่าไหร่แล้ว'},
+    {r:'A', hz:'大概完成了百分之七十，比计划慢了三天。', py:'Dàgài wánchéng le bǎi fēn zhī qīshí, bǐ jìhuà màn le sān tiān.', th:'เสร็จไปราวเจ็ดสิบเปอร์เซ็นต์ ช้ากว่าแผนสามวันครับ'},
+    {r:'B', hz:'原因是什么？', py:'Yuányīn shì shénme?', th:'สาเหตุคืออะไร'},
+    {r:'A', hz:'主要是因为临时增加了新的要求，需要重新设计。', py:'Zhǔyào shì yīnwèi línshí zēngjiā le xīn de yāoqiú, xūyào chóngxīn shèjì.', th:'หลัก ๆ เพราะมีข้อกำหนดใหม่เพิ่มมากะทันหัน ต้องออกแบบใหม่ครับ'},
+    {r:'B', hz:'那你有什么建议？', py:'Nà nǐ yǒu shénme jiànyì?', th:'แล้วคุณมีข้อเสนออะไรบ้าง'},
+    {r:'A', hz:'我建议每天开十分钟短会，这样可以提高效率。', py:'Wǒ jiànyì měi tiān kāi shí fēnzhōng duǎnhuì, zhèyàng kěyǐ tígāo xiàolǜ.', th:'ผมเสนอให้ประชุมสั้นวันละสิบนาที แบบนี้จะเพิ่มประสิทธิภาพได้ครับ'},
+    {r:'B', hz:'这个想法很好，我赞成。需要其他部门配合吗？', py:'Zhège xiǎngfǎ hěn hǎo, wǒ zànchéng. Xūyào qítā bùmén pèihé ma?', th:'ความคิดนี้ดีมาก ฉันเห็นด้วย ต้องให้แผนกอื่นร่วมมือด้วยไหม'},
+    {r:'A', hz:'需要设计部的配合，我会主动跟他们沟通。', py:'Xūyào shèjìbù de pèihé, wǒ huì zhǔdòng gēn tāmen gōutōng.', th:'ต้องให้ฝ่ายออกแบบร่วมมือครับ ผมจะติดต่อสื่อสารกับพวกเขาเอง'},
+    {r:'B', hz:'很好，我在会上会表扬你们组的努力。', py:'Hěn hǎo, wǒ zài huì shàng huì biǎoyáng nǐmen zǔ de nǔlì.', th:'ดีมาก ฉันจะชมความพยายามของทีมคุณในที่ประชุม'}
+  ],
+  phrases:[{hz:'进度',py:'jìndù',th:'ความคืบหน้า'},{hz:'百分之七十',py:'bǎi fēn zhī qīshí',th:'เจ็ดสิบเปอร์เซ็นต์'},{hz:'比计划慢了三天',py:'bǐ jìhuà màn le sān tiān',th:'ช้ากว่าแผนสามวัน'},{hz:'开短会',py:'kāi duǎnhuì',th:'ประชุมสั้น ๆ'},{hz:'这个想法很好',py:'Zhège xiǎngfǎ hěn hǎo',th:'ความคิดนี้ดีมาก'}],
+  keyWords:['汇报','临时','建议','效率','赞成','配合','主动','沟通','表扬']
+}
+];
+
+/* ============================================================
+   โจทย์แต่งประโยค (สถานการณ์จริงในที่ทำงาน/ชีวิตประจำวัน)
+   ============================================================ */
+const WRITING_SEED = [
+{ id:'w01', level:3, th:'เช้านี้รถติดมาก น้องไปถึงออฟฟิศสาย 10 นาที จะบอกผู้จัดการว่าอย่างไร',
+  zh:'今天早上你迟到了，怎么跟经理说？', must:['迟到'], hint:'ลองใช้ 因为…所以… ร่วมกับ 迟到',
+  models:['对不起，因为路上堵车，所以我迟到了十分钟。','经理，不好意思，我今天迟到了，以后我会早一点出门。'] },
+{ id:'w02', level:3, th:'เพื่อนร่วมงานกำลังยุ่งมาก น้องอยากเสนอตัวช่วย จะพูดว่าอย่างไร',
+  zh:'同事很忙，你想帮他，怎么说？', must:['帮忙'], hint:'ใช้ 需要…吗？ หรือ 我可以…',
+  models:['你看起来很忙，需要我帮忙吗？','如果你忙不过来，我可以帮你的忙。'] },
+{ id:'w03', level:3, th:'น้องอยากลาหนึ่งวันเพื่อไปหาหมอ ลองเขียนประโยคขอลา',
+  zh:'你想请一天假去医院，怎么说？', must:['请假'], hint:'ใช้ 我想请…假 + เหตุผล',
+  models:['经理，我想请一天假，因为我要去医院检查身体。','我明天想请假，身体有点儿不舒服。'] },
+{ id:'w04', level:3, th:'แนะนำตัวเองกับเพื่อนร่วมงานใหม่ บอกชื่อและงานที่รับผิดชอบ',
+  zh:'向新同事介绍自己。', must:[], hint:'ใช้ 我叫… + 我负责…',
+  models:['大家好，我叫小美，我负责跟客人联系。','很高兴认识大家，我是新来的同事，请多关照。'] },
+{ id:'w05', level:4, th:'ลูกค้าถามว่าเมื่อไหร่จะส่งของ แต่ของจะช้าไป 2 วัน จะตอบอย่างไรให้สุภาพ',
+  zh:'货要晚两天，怎么告诉客户？', must:['延误'], hint:'ขอโทษก่อน แล้วบอกเหตุผล และเสนอทางแก้',
+  models:['非常抱歉，由于天气原因，发货会延误两天。','不好意思，这批货延误了，我们会想办法尽快送到。'] },
+{ id:'w06', level:4, th:'หัวหน้าถามความเห็นเรื่องแผนงานใหม่ น้องเห็นด้วยแต่มีข้อเสนอเพิ่ม',
+  zh:'经理问你的意见，你同意但有补充。', must:['意见'], hint:'ใช้ 我同意…，不过我的意见是…',
+  models:['我同意这个计划，不过我的意见是时间可以再长一点。','这个方案很好，我还有一个小意见想跟大家讨论。'] },
+{ id:'w07', level:4, th:'นัดประชุมกับทีมในวันพุธบ่ายสองโมง ลองเขียนประโยคแจ้งทุกคน',
+  zh:'通知大家星期三下午两点开会。', must:['通知','会议'], hint:'ใช้ 请大家… + 准时',
+  models:['通知大家：星期三下午两点开会，请准时参加。','我想通知各位，这次会议改到星期三下午两点。'] },
+{ id:'w08', level:4, th:'น้องทำงานผิดพลาดเล็กน้อย จะขอโทษหัวหน้าและบอกวิธีแก้อย่างไร',
+  zh:'你做错了一件事，怎么向经理道歉？', must:['道歉'], hint:'ขอโทษ + บอกสาเหตุ + บอกว่าจะแก้อย่างไร',
+  models:['经理，我为这次的错误向您道歉，我马上重新做一份。','对不起，这是我的责任，我向您道歉，以后一定更认真。'] },
+{ id:'w09', level:4, th:'เล่าว่าทำไมน้องถึงอยากเรียนภาษาจีน ใช้โครงสร้าง 因为…所以…',
+  zh:'你为什么想学中文？', must:['因为','所以'], hint:'เหตุผลจริง ๆ ของน้องเองก็ได้',
+  models:['因为我的工作需要跟中国客户沟通，所以我想学好中文。','因为我喜欢中国文化，所以我每天都练习中文。'] },
+{ id:'w10', level:5, th:'รายงานหัวหน้าว่าโครงการเสร็จ 70% และช้ากว่าแผน 3 วัน',
+  zh:'向经理汇报项目进度。', must:['汇报'], hint:'ใช้ 我来向您汇报… + ตัวเลข + 原因',
+  models:['经理，我来向您汇报进度：现在完成了百分之七十，比计划慢了三天。','我想向您汇报一下，项目进度有点慢，主要原因是要求临时改变了。'] },
+{ id:'w11', level:5, th:'เสนอวิธีเพิ่มประสิทธิภาพการทำงานให้ทีม',
+  zh:'提一个提高工作效率的建议。', must:['建议','效率'], hint:'ใช้ 我建议… + 这样可以…',
+  models:['我建议每天开一个短会，这样可以提高工作效率。','我的建议是先做重要的事，这样效率会更高。'] },
+{ id:'w12', level:5, th:'ขอบคุณเพื่อนร่วมงานต่างแผนกที่ช่วยงานจนสำเร็จ',
+  zh:'感谢其他部门的配合。', must:['配合'], hint:'ใช้ 谢谢…的配合 + ผลลัพธ์',
+  models:['非常感谢各部门的配合，这次工作进行得很顺利。','谢谢你们的配合，没有你们我们完不成这个任务。'] },
+{ id:'w13', level:5, th:'แทนที่จะบ่นเรื่องปัญหา ลองเขียนประโยคชวนทีมหาทางแก้ (ใช้ 与其…不如…)',
+  zh:'用「与其…不如…」写一句话。', must:['与其','不如'], hint:'与其 + สิ่งที่ไม่ควรทำ，不如 + สิ่งที่ควรทำ',
+  models:['与其抱怨，不如一起想办法解决问题。','与其等别人安排，不如主动把工作做好。'] },
+{ id:'w14', level:5, th:'ให้กำลังใจเพื่อนร่วมงานที่ประหม่าก่อนพรีเซนต์ภาษาจีน',
+  zh:'鼓励一个紧张的同事。', must:[], hint:'ใช้ 别担心 / 只要…就… / 自信',
+  models:['别紧张，只要你认真准备了，就一定没问题。','放心吧，你的中文很好，自信一点！'] }
+];
+
+/* ============================================================
+   คำชมและกำลังใจ (ชมทุกคน ไม่ว่าคะแนนเท่าไหร่)
+   ============================================================ */
+const PRAISE = {
+  high: [
+    { zh:'太棒了！', py:'Tài bàng le!', th:'สุดยอดไปเลย! น้องแม่นมากจริง ๆ ครูภูมิใจนะ' },
+    { zh:'非常优秀！', py:'Fēicháng yōuxiù!', th:'เก่งมากกก ระดับนี้พร้อมไปคุยกับคนจีนจริงแล้วนะ' },
+    { zh:'你真厉害！', py:'Nǐ zhēn lìhai!', th:'เยี่ยมมาก! ความตั้งใจของน้องเห็นผลชัดเลย' }
+  ],
+  mid: [
+    { zh:'做得很好！', py:'Zuò de hěn hǎo!', th:'ทำได้ดีมากเลย! อีกนิดเดียวก็เต็มแล้วนะ' },
+    { zh:'有进步！', py:'Yǒu jìnbù!', th:'เห็นพัฒนาการชัดเลย ลองอีกรอบจะยิ่งแม่นขึ้นแน่นอน' },
+    { zh:'继续加油！', py:'Jìxù jiāyóu!', th:'ดีมากแล้ว! คำที่ยังไม่ชัวร์ไว้เราเก็บรอบหน้านะ' }
+  ],
+  low: [
+    { zh:'没关系，加油！', py:'Méi guānxi, jiāyóu!', th:'ไม่เป็นไรเลยนะ ที่กล้าลองทำคือเก่งแล้ว! รอบหน้าดีขึ้นแน่นอน' },
+    { zh:'慢慢来！', py:'Màn màn lái!', th:'ค่อย ๆ ไปนะ ทุกคนเริ่มจากจุดนี้กันทั้งนั้น ครูเชื่อในตัวน้อง' },
+    { zh:'你已经很棒了！', py:'Nǐ yǐjīng hěn bàng le!', th:'แค่มาลงมือทำก็เก่งกว่าเมื่อวานแล้ว! พรุ่งนี้มาต่อกันนะ' }
+  ],
+  always: [
+    'ทุกคำที่ผิดวันนี้ คือคำที่น้องจะจำได้แม่นที่สุดในวันพรุ่งนี้ 💪',
+    'ภาษาจีนไม่ได้วัดกันที่ความสมบูรณ์แบบ แต่วัดกันที่ความกล้าพูด — และน้องกล้าแล้ว 🎉',
+    'พูดผิดได้ ไม่มีใครหัวเราะ คนจีนดีใจมากเวลาเห็นคนต่างชาติพยายามพูดภาษาเขา 🇨🇳',
+    'ทำวันละนิด ดีกว่าหักโหมวันเดียว เจอกันใหม่พรุ่งนี้นะ ⭐',
+    'เสียงของน้องวันนี้ ชัดกว่าเมื่อวานแน่นอน เชื่อครูสิ 🎤'
+  ]
+};
+
+const CAT_LABEL = {
+  work:            { th:'การทำงาน',        emoji:'💼', cls:'bg-indigo-100 text-indigo-800' },
+  communication:   { th:'การสื่อสาร',       emoji:'💬', cls:'bg-blue-100 text-blue-800' },
+  transportation:  { th:'เดินทาง/ขนส่ง',   emoji:'🚗', cls:'bg-amber-100 text-amber-800' },
+  daily:           { th:'ชีวิตประจำวัน',    emoji:'🏠', cls:'bg-teal-100 text-teal-800' },
+  emotion:         { th:'อารมณ์ความรู้สึก', emoji:'💗', cls:'bg-rose-100 text-rose-800' },
+  study:           { th:'การเรียน',         emoji:'📖', cls:'bg-violet-100 text-violet-800' },
+  general:         { th:'คำศัพท์ทั่วไป',    emoji:'📚', cls:'bg-emerald-100 text-emerald-800' }
+};
+
+const LEVEL_CLS = { 3:'bg-emerald-100 text-emerald-700', 4:'bg-amber-100 text-amber-700', 5:'bg-rose-100 text-rose-700' };
+
+</script>
+<script>
+/* ============================================================
+   HSK 3-5 Learning Hub — application logic (mobile edition)
+   ============================================================ */
+const STORE_KEY = 'hsk345_hub_v2';
+let S = {
+  theme: 'light',
+  levels: [3,4,5],
+  cats: [],
+  stats: { known:0, correct:0, sentences:0, speak:0 },
+  bank: null,
+  saved: [],
+  audioMode: 'auto'
+};
+function loadStore(){ try{ const r=localStorage.getItem(STORE_KEY); if(r) S=Object.assign(S,JSON.parse(r)); }catch(e){} }
+function saveStore(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){} }
+
+const VOCAB = () => (S.bank && S.bank.length ? S.bank : VOCAB_SEED);
+const rnd  = a => a[Math.floor(Math.random()*a.length)];
+const shuf = a => a.slice().sort(()=>Math.random()-0.5);
+const esc  = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const el   = id => document.getElementById(id);
+
+function pool(){ return VOCAB().filter(v => S.levels.includes(Number(v.level)) && (S.cats.length===0 || S.cats.includes(v.cat))); }
+function patternPool(){ const p = PATTERN_SEED.filter(x=>S.levels.includes(x.level)); return p.length?p:PATTERN_SEED; }
+function safePool(){ const p = pool(); return p.length ? p : VOCAB().slice(0,20); }
+function glossOf(hz){ return VOCAB().find(v=>v.hanzi===hz) || VOCAB_SEED.find(v=>v.hanzi===hz) || null; }
+
+/* ============================================================
+   ธีมกลางวัน / กลางคืน
+   ============================================================ */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', S.theme);
+  const b = el('theme-btn');
+  if(b) b.innerHTML = S.theme==='dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', S.theme==='dark' ? '#0b1220' : '#2563eb');
+}
+function toggleTheme(){ S.theme = S.theme==='dark' ? 'light' : 'dark'; saveStore(); applyTheme(); }
+
+/* ============================================================
+   เสียงอ่าน (มีระบบสำรองออนไลน์)
+   ============================================================ */
+let voices = [], voiceZh = null, voicesLoaded = false;
+let audioNote = '', audioEl = null, speakWatchdog = null;
+const hasTTS = (typeof window!=='undefined') && ('speechSynthesis' in window);
+
+function loadVoices(){
+  if(!hasTTS){ renderAudioStatus(); return; }
+  try{ voices = speechSynthesis.getVoices() || []; }catch(e){ voices = []; }
+  voiceZh = voices.find(v=>/^zh[-_]?(CN|Hans)/i.test(v.lang))
+         || voices.find(v=>/^zh/i.test(v.lang))
+         || voices.find(v=>/chinese|mandarin|putonghua|中文|普通话/i.test(v.name||'')) || null;
+  voicesLoaded = voices.length>0;
+  renderAudioStatus();
+}
+function initAudio(){
+  if(!hasTTS){ renderAudioStatus(); return; }
+  loadVoices();
+  try{ speechSynthesis.onvoiceschanged = loadVoices; }catch(e){}
+  let n=0; const t=setInterval(()=>{ if(voicesLoaded || ++n>12) clearInterval(t); else loadVoices(); },200);
+  setInterval(()=>{ try{ if(speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.resume(); }catch(e){} }, 8000);
+}
+function cleanZh(t){ return String(t==null?'':t).replace(/[＿_]+/g,'').replace(/\s+/g,' ').trim(); }
+function stopSpeaking(){ try{ if(hasTTS) speechSynthesis.cancel(); }catch(e){} try{ if(audioEl) audioEl.pause(); }catch(e){} clearTimeout(speakWatchdog); }
+
+function speakZh(text, rate){
+  const t = cleanZh(text); if(!t) return;
+  if(Mic.active) return;                       // อย่าพูดทับตอนกำลังฟังเสียงผู้เรียน
+  if(S.audioMode==='online' || !hasTTS){ playOnline(t); return; }
+  let started = false;
+  try{
+    stopSpeaking();
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang='zh-CN'; u.rate = rate || 0.85;
+    if(voiceZh) u.voice = voiceZh;
+    u.onstart = ()=>{ started=true; clearTimeout(speakWatchdog); };
+    u.onerror = (e)=>{ clearTimeout(speakWatchdog);
+      if(e && e.error==='interrupted') return;
+      setAudioNote('เสียงในเครื่องมีปัญหา ('+((e&&e.error)||'error')+') — สลับไปเสียงออนไลน์ให้แล้ว'); playOnline(t); };
+    speakWatchdog = setTimeout(()=>{ if(!started){ setAudioNote('เครื่องนี้ไม่มีเสียงภาษาจีน — ใช้เสียงออนไลน์ให้อัตโนมัติ'); playOnline(t); } }, 1200);
+    setTimeout(()=>{ try{ speechSynthesis.speak(u); }catch(e){ playOnline(t); } }, 60);
+  }catch(e){ playOnline(t); }
+}
+function playOnline(text){
+  try{
+    if(!audioEl) audioEl = new Audio();
+    audioEl.pause();
+    audioEl.src = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=zh-CN&q='+encodeURIComponent(text.slice(0,180));
+    const pr = audioEl.play();
+    if(pr && pr.catch) pr.catch(()=> setAudioNote('เล่นเสียงออนไลน์ไม่สำเร็จ — ตรวจอินเทอร์เน็ต หรือแตะปุ่มใด ๆ ในหน้าเว็บสักครั้งก่อน'));
+  }catch(e){ setAudioNote('เล่นเสียงออนไลน์ไม่สำเร็จ: '+e.message); }
+}
+function setAudioNote(m){ audioNote=m; renderAudioStatus(); }
+function setAudioMode(m){ S.audioMode=m; audioNote=''; saveStore(); stopSpeaking(); renderAudioStatus(); speakZh('你好'); }
+function testAudio(){ speakZh('你好，我们一起学中文。'); }
+
+function renderAudioStatus(){
+  const box = el('audio-status'); if(!box) return;
+  const zhList = voices.filter(v=>/^zh/i.test(v.lang)).map(v=>v.name);
+  const row=(ok,label,detail)=>'<li class="flex items-start gap-2 text-sm"><i class="fa-solid '+(ok?'fa-circle-check text-emerald-500':'fa-circle-xmark text-rose-500')+' mt-1"></i><span>'+label+(detail?' <span style="color:var(--dim)">— '+detail+'</span>':'')+'</span></li>';
+  let h='<ul class="space-y-1 mb-3">';
+  h+=row(hasTTS,'เบราว์เซอร์อ่านออกเสียงได้', hasTTS?'':'ลองใช้ Chrome หรือ Safari');
+  h+=row(voicesLoaded,'พบเสียงในเครื่อง', voicesLoaded? voices.length+' เสียง':'ยังไม่พบ');
+  h+=row(!!voiceZh,'มีเสียงภาษาจีน', voiceZh? voiceZh.name : 'ไม่พบ — ระบบใช้เสียงออนไลน์แทนให้');
+  h+='</ul>';
+  if(zhList.length>1) h+='<p class="text-[11px] mb-3" style="color:var(--dim)">เสียงจีนที่มี: '+esc(zhList.join(' · '))+'</p>';
+  h+='<div class="flex flex-wrap gap-2 mb-2">'
+   + '<button onclick="testAudio()" class="text-xs px-3 py-2 rounded-lg bg-blue-600 text-white font-medium"><i class="fa-solid fa-volume-high"></i> ทดสอบเสียง 你好</button>'
+   + '<button onclick="setAudioMode(\'auto\')" class="text-xs px-3 py-2 rounded-lg font-medium" style="'+(S.audioMode==='auto'?'background:var(--ink);color:var(--card)':'background:var(--soft);border:1px solid var(--line)')+'">เสียงในเครื่อง</button>'
+   + '<button onclick="setAudioMode(\'online\')" class="text-xs px-3 py-2 rounded-lg font-medium" style="'+(S.audioMode==='online'?'background:var(--ink);color:var(--card)':'background:var(--soft);border:1px solid var(--line)')+'">เสียงออนไลน์</button>'
+   + '</div>';
+  if(audioNote) h+='<p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2" style="border:1px solid rgba(245,158,11,.3)">'+esc(audioNote)+'</p>';
+  box.innerHTML = h;
+}
+
+/* ============================================================
+   ไมโครโฟน (เขียนใหม่ทั้งหมด — กันยิงซ้ำ / กันค้าง)
+   ============================================================ */
+const Mic = {
+  SR: null, rec: null, active: false, starting: false,
+  target: '', cb: null, statusId: 'sp-status', timer: null, got: false, lastErr: ''
+};
+function micSupported(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function isFileUrl(){ try{ return location.protocol === 'file:'; }catch(e){ return false; } }
+function micStatus(msg){ const e = el(Mic.statusId); if(e) e.innerText = msg; }
+function micBusy(on){
+  ['sp-mic','rp-mic'].forEach(id=>{ const b=el(id); if(b){ if(on) b.classList.add('mic-pulse'); else b.classList.remove('mic-pulse'); } });
+}
+const ERR_TH = {
+  'not-allowed':'ยังไม่ได้อนุญาตให้ใช้ไมโครโฟน — แตะไอคอนด้านซ้ายของช่องที่อยู่เว็บ แล้วอนุญาต Microphone',
+  'service-not-allowed':'เบราว์เซอร์ไม่ยอมให้ใช้บริการแปลงเสียง (มักเกิดเมื่อเปิดไฟล์แบบ file:// ) — ดูวิธีแก้ในหน้าหลัก',
+  'no-speech':'ไม่ได้ยินเสียงเลย ลองพูดดังขึ้นแล้วแตะไมค์ใหม่อีกครั้ง',
+  'audio-capture':'หาไมโครโฟนไม่เจอ ตรวจสอบว่าเครื่องมีไมค์และไม่ได้ถูกแอปอื่นใช้อยู่',
+  'aborted':'หยุดฟังแล้ว',
+  'network':'เชื่อมต่อบริการแปลงเสียงไม่ได้ ตรวจสอบอินเทอร์เน็ต'
+};
+function micListen(target, cb, statusId){
+  if(Mic.active || Mic.starting){ micStop(); return; }
+  if(!micSupported()){
+    Mic.lastErr = 'เบราว์เซอร์นี้ยังฟังเสียงไม่ได้';
+    micStatus('เบราว์เซอร์นี้ยังไม่รองรับการฟังเสียง — ใช้ Chrome (Android/คอม) หรือ Safari (iPhone)');
+    renderMicStatus(); return;
+  }
+  stopSpeaking();                            // กันเสียงอ่านตีกับไมค์
+  Mic.target = target; Mic.cb = cb; Mic.statusId = statusId || 'sp-status'; Mic.got = false; Mic.lastErr='';
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  try{ if(Mic.rec){ Mic.rec.onend=null; Mic.rec.onresult=null; Mic.rec.onerror=null; Mic.rec.abort(); } }catch(e){}
+  const r = new SR();
+  Mic.rec = r;
+  r.lang = 'zh-CN'; r.continuous = false; r.interimResults = false; r.maxAlternatives = 3;
+  Mic.starting = true;
+  r.onstart = ()=>{ Mic.starting=false; Mic.active=true; micBusy(true); micStatus('🎙️ กำลังฟัง… พูดได้เลย'); };
+  r.onresult = (e)=>{
+    if(!Mic.cb) return;                       // กันเหตุการณ์ยิงซ้ำ
+    Mic.got = true;
+    const alts = [];
+    for(let i=0;i<e.results.length;i++){
+      const res = e.results[i];
+      for(let j=0;j<res.length;j++){ if(res[j] && res[j].transcript) alts.push(res[j].transcript); }
+    }
+    let best = alts[0] || '', ok = false;
+    const exact = alts.find(a=>exactZh(a, Mic.target));     // ตรงเป๊ะก่อน
+    if(exact){ ok = true; best = exact; }
+    else { const near = alts.find(a=>matchZh(a, Mic.target)); if(near){ ok = true; best = near; } }
+    const cb = Mic.cb;
+    micFinish();
+    if(cb) cb(ok, best);
+  };
+  r.onerror = (e)=>{
+    const code = (e && e.error) || 'error';
+    Mic.lastErr = ERR_TH[code] || ('เกิดข้อผิดพลาด: '+code);
+    micFinish();
+    if(code !== 'aborted') micStatus(Mic.lastErr);
+    renderMicStatus();
+  };
+  r.onend = ()=>{ if(!Mic.got && Mic.active) micStatus(Mic.lastErr || 'หยุดฟังแล้ว — แตะไมค์เพื่อพูดอีกครั้ง'); micFinish(); };
+  clearTimeout(Mic.timer);
+  Mic.timer = setTimeout(()=>{ if(Mic.active || Mic.starting) micStop(); }, 8000);
+  try{ r.start(); }
+  catch(err){ Mic.starting=false; micFinish(); micStatus('เริ่มฟังไม่สำเร็จ ลองแตะไมค์อีกครั้ง'); }
+}
+function micFinish(){ Mic.active=false; Mic.starting=false; Mic.cb=null; clearTimeout(Mic.timer); micBusy(false); }
+function micStop(){ try{ if(Mic.rec) Mic.rec.stop(); }catch(e){} micFinish(); micStatus('แตะไมโครโฟน แล้วออกเสียงตามด้านบน'); }
+function stripZh(x){ return String(x||'').replace(/[，。！？、,.!?？\s·]/g,''); }
+function exactZh(heard, target){
+  const a = stripZh(heard), b = stripZh(target);
+  return !!(a && b && (a === b || a.includes(b) || b.includes(a)));
+}
+function matchZh(heard, target){
+  const a = stripZh(heard), b = stripZh(target);
+  if(!a || !b) return false;
+  if(exactZh(a,b)) return true;
+  return similar(a,b) >= 0.6;
+}
+function similar(a,b){
+  let hit=0; const bb=b.split('');
+  a.split('').forEach(ch=>{ const k=bb.indexOf(ch); if(k>=0){ hit++; bb.splice(k,1); } });
+  return hit/Math.max(a.length,b.length);
+}
+function renderMicStatus(){
+  const box = el('mic-status'); if(!box) return;
+  const sup = micSupported(), file = isFileUrl();
+  const row=(ok,label,detail)=>'<li class="flex items-start gap-2 text-sm"><i class="fa-solid '+(ok?'fa-circle-check text-emerald-500':'fa-circle-xmark text-rose-500')+' mt-1"></i><span>'+label+(detail?' <span style="color:var(--dim)">— '+detail+'</span>':'')+'</span></li>';
+  let h='<ul class="space-y-1 mb-3">';
+  h+=row(sup,'เบราว์เซอร์ฟังเสียงได้', sup?'':'ใช้ Chrome (Android/คอม) หรือ Safari (iPhone)');
+  h+=row(!file,'เปิดจากเว็บ (ไม่ใช่ไฟล์ในเครื่อง)', file?'เปิดแบบ file:// ไมค์มักถูกบล็อก':'');
+  h+='</ul>';
+  h+='<button onclick="micSelfTest()" class="text-xs px-3 py-2 rounded-lg bg-rose-500 text-white font-medium"><i class="fa-solid fa-microphone"></i> ทดสอบไมค์ (พูดว่า 你好)</button>';
+  h+='<p id="mic-test-status" class="text-xs mt-2" style="color:var(--mut)">แตะปุ่มแล้วพูดว่า 你好</p>';
+  if(file) h+='<p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-2" style="border:1px solid rgba(245,158,11,.3)">ถ้าไมค์ไม่ทำงาน: เบราว์เซอร์อนุญาตให้ใช้ไมค์เฉพาะหน้าเว็บที่เปิดผ่าน https หรือ localhost เท่านั้น ลองอัปไฟล์นี้ขึ้นเว็บฟรี (เช่น Netlify Drop / GitHub Pages) หรือรันคำสั่ง <code>python -m http.server</code> ในโฟลเดอร์ที่เก็บไฟล์ แล้วเปิด http://localhost:8000 — ส่วนอื่น ๆ ของเว็บใช้ได้ปกติทั้งหมด</p>';
+  box.innerHTML = h;
+}
+function micSelfTest(){
+  micListen('你好', (ok, heard)=>{
+    const p = el('mic-test-status'); if(!p) return;
+    p.innerHTML = ok ? '<span class="text-emerald-600 font-semibold">ไมค์ทำงานปกติ! ได้ยินว่า “'+esc(heard)+'”</span>'
+                     : '<span class="text-amber-600 font-semibold">ได้ยินว่า “'+esc(heard||'—')+'” — ไมค์ทำงานแล้ว แต่เสียงยังไม่ตรง ลองใหม่อีกครั้ง</span>';
+  }, 'mic-test-status');
+}
+function showFileWarning(){
+  const box = el('file-warn'); if(!box) return;
+  if(!isFileUrl()) return;
+  box.classList.remove('hidden');
+  box.innerHTML = '<div class="rounded-2xl px-4 py-3 text-xs text-amber-800 bg-amber-50" style="border:1px solid rgba(245,158,11,.35)">'
+    + '<b><i class="fa-solid fa-circle-info"></i> หมายเหตุ:</b> ตอนนี้เปิดไฟล์จากเครื่องโดยตรง (file://) ทุกโหมดใช้ได้ปกติ '
+    + 'ยกเว้น “ฝึกพูดด้วยไมค์” ที่เบราว์เซอร์มักบล็อก — ดูวิธีแก้ที่การ์ด “ตรวจสอบไมโครโฟน” ในหน้าหลัก '
+    + '<button onclick="switchTab(\'home\')" class="underline font-semibold">ไปดู</button></div>';
+}
+
+/* ============================================================
+   แท็บ / ตัวกรอง
+   ============================================================ */
+const TABS = ['home','flash','drill','dialog','speak','bank'];
+let drillView = 'fill';
+function switchTab(t){
+  TABS.forEach(x=>{
+    const b = el('tab-'+x), s = el('sec-'+x);
+    if(s){ if(x===t) s.classList.remove('hidden'); else s.classList.add('hidden'); }
+    if(b && b.classList.contains('navbtn')){ if(x===t) b.classList.add('on'); else b.classList.remove('on'); }
+  });
+  micStop(); stopSpeaking();
+  try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){}
+  if(t==='home'){ renderHome(); }
+  if(t==='flash' && !fc.list.length) startFlash();
+  if(t==='drill'){ switchDrill(drillView); }
+  if(t==='dialog') renderDlgList();
+  if(t==='speak' && !sp.list.length) startSpeak();
+  if(t==='bank') renderBank();
+}
+function switchDrill(v){
+  drillView = v;
+  el('sub-fill').classList.toggle('hidden', v!=='fill');
+  el('sub-write').classList.toggle('hidden', v!=='write');
+  el('sub-fill-btn').classList.toggle('on', v==='fill');
+  el('sub-write-btn').classList.toggle('on', v==='write');
+  if(v==='fill' && !fi.qs.length) startFill();
+  if(v==='write' && !wr.item) startWrite();
+}
+function toggleLevel(l){
+  const i = S.levels.indexOf(l);
+  if(i>=0){ if(S.levels.length===1) return; S.levels.splice(i,1); } else S.levels.push(l);
+  document.querySelectorAll('.lvl-btn').forEach(b=>b.classList.toggle('lvl-on', S.levels.includes(Number(b.dataset.lvl))));
+  saveStore(); refreshAll();
+}
+function setCat(c){
+  if(c===null) S.cats=[]; else { const i=S.cats.indexOf(c); if(i>=0) S.cats.splice(i,1); else S.cats.push(c); }
+  saveStore(); refreshAll();
+}
+function scrollToCats(){ const b=el('cat-box'); if(b && b.scrollIntoView) setTimeout(()=>b.scrollIntoView({behavior:'smooth',block:'center'}),120); }
+function renderCatChips(){
+  const box = el('cat-chips'); if(!box) return;
+  const chip=(on,label,fn)=>'<button onclick="'+fn+'" class="px-3 py-2 rounded-xl text-xs font-medium tap" style="'+(on?'background:var(--brand);color:#fff;border:1px solid var(--brand)':'background:var(--card);border:1px solid var(--line);color:var(--mut)')+'">'+label+'</button>';
+  let h = chip(S.cats.length===0,'ทุกหมวด','setCat(null)');
+  Object.keys(CAT_LABEL).forEach(c=>{ h += chip(S.cats.includes(c), CAT_LABEL[c].emoji+' '+CAT_LABEL[c].th, "setCat('"+c+"')"); });
+  box.innerHTML = h;
+  el('pool-count').innerText = pool().length;
+  const sum = el('cat-sum');
+  if(sum) sum.innerText = S.cats.length===0 ? 'ทุกหมวด' : (S.cats.length===1 ? CAT_LABEL[S.cats[0]].th : S.cats.length+' หมวด');
+}
+function refreshAll(){
+  renderCatChips(); renderStats();
+  fc.list=[]; fi.qs=[]; sp.list=[]; wr.item=null;
+  const vis = TABS.find(t=>el('sec-'+t) && !el('sec-'+t).classList.contains('hidden'));
+  if(vis) switchTab(vis);
+}
+function renderStats(){
+  el('st-known').innerText = S.stats.known;
+  el('st-correct').innerText = S.stats.correct;
+  el('st-sent').innerText = S.saved.length;
+  el('st-speak').innerText = S.stats.speak;
+}
+
+/* ---------- หน้าหลัก ---------- */
+const HOME_CARDS = [
+  { t:'การ์ดคำศัพท์', d:'ดูตัวจีน เดาความหมาย แล้วพลิกเฉลย', i:'fa-clone', c:'#3b82f6,#6366f1', go:"switchTab('flash')" },
+  { t:'เติมคำในช่องว่าง', d:'เติมคำศัพท์หรือรูปประโยคลงในประโยคจริง', i:'fa-pen-to-square', c:'#6366f1,#8b5cf6', go:"switchTab('drill');switchDrill('fill')" },
+  { t:'แต่งประโยคเอง', d:'อ่านสถานการณ์ แล้วพิมพ์ประโยคจีนของตัวเอง', i:'fa-feather', c:'#8b5cf6,#d946ef', go:"switchTab('drill');switchDrill('write')" },
+  { t:'บทสนทนาที่ทำงาน', d:'เตรียมคำศัพท์ → อ่านบท → สวมบทบาทพูดเอง', i:'fa-comments', c:'#10b981,#14b8a6', go:"switchTab('dialog')" },
+  { t:'ฝึกพูดกับไมค์', d:'ออกเสียงแล้วให้ระบบฟังว่าตรงไหม', i:'fa-microphone', c:'#f43f5e,#ef4444', go:"switchTab('speak')" },
+  { t:'คลังคำศัพท์', d:'ค้นหาทุกคำ และแก้ไขเองผ่าน Excel', i:'fa-book-open', c:'#f59e0b,#f97316', go:"switchTab('bank')" }
+];
+function renderHome(){
+  renderStats(); renderCatChips(); renderAudioStatus(); renderMicStatus();
+  el('home-cards').innerHTML = HOME_CARDS.map(c=>
+    '<button onclick="'+c.go+'" class="card p-4 text-left" style="min-height:124px">'
+    + '<div class="w-10 h-10 rounded-xl text-white flex items-center justify-center mb-2" style="background:linear-gradient(135deg,'+c.c+')"><i class="fa-solid '+c.i+'"></i></div>'
+    + '<h3 class="font-semibold text-sm mb-1">'+c.t+'</h3>'
+    + '<p class="text-[11px] leading-relaxed" style="color:var(--mut)">'+c.d+'</p></button>').join('');
+}
+
+/* ============================================================
+   1) การ์ดคำศัพท์
+   ============================================================ */
+let fc = { list:[], i:0, revealed:false, timer:null, known:0, forgot:0 };
+function startFlash(){
+  const size = parseInt(el('fc-size').value);
+  let p = shuf(safePool());
+  if(size>0) p = p.slice(0,size);
+  fc = { list:p, i:0, revealed:false, timer:null, known:0, forgot:0 };
+  el('fc-known').innerText=0; el('fc-forgot').innerText=0;
+  if(fc.list.length) showFlash();
+}
+function showFlash(){
+  clearInterval(fc.timer); fc.revealed=false;
+  const it = fc.list[fc.i];
+  el('fc-count').innerText = (fc.i+1)+' / '+fc.list.length;
+  el('fc-hanzi').innerText = it.hanzi;
+  const lv = el('fc-lvl'); lv.innerText='HSK '+it.level;
+  lv.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold '+(LEVEL_CLS[it.level]||'bg-slate-100');
+  const cl = CAT_LABEL[it.cat] || {th:it.cat,emoji:'📚',cls:'bg-slate-100'};
+  const cb = el('fc-cat'); cb.innerText = cl.emoji+' '+cl.th;
+  cb.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium '+cl.cls;
+  el('fc-reveal').classList.add('opacity-0');
+  el('fc-pinyin').innerText = it.pinyin;
+  el('fc-th').innerText = it.th;
+  el('fc-sent').innerText = it.sent||'';
+  el('fc-sentth').innerText = it.sentTh||'';
+  el('fc-btn-reveal').classList.remove('hidden');
+  el('fc-actions').classList.add('hidden');
+  runFlashTimer();
+}
+function runFlashTimer(){
+  const v = parseInt(el('fc-timer').value), bar = el('fc-bar');
+  bar.style.width='100%'; if(v<=0) return;
+  let e=0; const total=v*1000;
+  fc.timer = setInterval(()=>{ e+=100; bar.style.width=Math.max(0,100-(e/total)*100)+'%';
+    if(e>=total){ clearInterval(fc.timer); if(!fc.revealed) revealFlash(false); } },100);
+}
+function revealFlash(manual){
+  if(fc.revealed) return;
+  fc.revealed=true; clearInterval(fc.timer);
+  el('fc-reveal').classList.remove('opacity-0');
+  el('fc-btn-reveal').classList.add('hidden');
+  el('fc-actions').classList.remove('hidden');
+  speakZh(fc.list[fc.i].hanzi);
+  if(el('fc-auto').checked && manual) setTimeout(()=>{ if(fc.revealed) markFlash(true); }, 2500);
+}
+function markFlash(known){
+  if(known){ fc.known++; S.stats.known++; } else fc.forgot++;
+  saveStore(); renderStats();
+  el('fc-known').innerText=fc.known; el('fc-forgot').innerText=fc.forgot;
+  if(fc.i >= fc.list.length-1){ showPraise(fc.known, fc.list.length, 'การ์ดคำศัพท์', startFlash); return; }
+  fc.i++; showFlash();
+}
+
+/* ============================================================
+   2) เติมคำในช่องว่าง
+   ============================================================ */
+let fi = { qs:[], i:0, score:0, answered:false };
+function fillable(v){ return v.sent && v.hanzi && v.sent.includes(v.hanzi); }
+function buildVocabQ(it, all){
+  const others = shuf(all.filter(x=>x.hanzi!==it.hanzi)).slice(0,3).map(x=>x.hanzi);
+  return { kind:'vocab', q:(it.sent||'').split(it.hanzi).join('＿＿＿'), qth:it.sentTh||'', ans:it.hanzi,
+    hint:'ความหมายที่ต้องการ: '+it.th+' ('+it.pinyin+')', options:shuf([it.hanzi].concat(others)),
+    full:it.sent, fullPy:it.sentPy };
+}
+function buildPatternQ(p, conn){
+  const idx = Math.floor(Math.random()*p.answers.length); let k=-1;
+  const q = p.blank.replace(/___/g, ()=>{ k++; return k===idx?'＿＿＿':p.answers[k]; });
+  const ans = p.answers[idx];
+  return { kind:'pattern', q:q, qth:p.sentTh, ans:ans, hint:'รูปประโยค「'+p.pattern+'」= '+p.th,
+    options:shuf([ans].concat(shuf(conn.filter(x=>x!==ans)).slice(0,3))), full:p.sent, fullPy:p.sentPy };
+}
+function startFill(){
+  const kind = el('fi-kind').value, n = parseInt(el('fi-size').value);
+  const vp = safePool(), pp = patternPool();
+  const conn = Array.from(new Set(PATTERN_SEED.flatMap(p=>p.answers)));
+  let qs=[];
+  if(kind==='vocab') qs = shuf(vp.filter(fillable)).slice(0,n).map(v=>buildVocabQ(v,vp));
+  else if(kind==='pattern') qs = shuf(pp).slice(0,n).map(p=>buildPatternQ(p,conn));
+  else qs = shuf(shuf(vp.filter(fillable)).slice(0,Math.ceil(n/2)).map(v=>buildVocabQ(v,vp))
+                 .concat(shuf(pp).slice(0,Math.floor(n/2)).map(p=>buildPatternQ(p,conn))));
+  fi = { qs:qs, i:0, score:0, answered:false };
+  el('fi-score').innerText=0; el('fi-total').innerText=qs.length;
+  if(qs.length) renderFill();
+}
+function currentFillAudio(){ const q=fi.qs[fi.i]; return q?q.full:''; }
+function renderFill(){
+  const q = fi.qs[fi.i]; fi.answered=false;
+  el('fi-tag').innerText = 'ข้อ '+(fi.i+1)+'/'+fi.qs.length+(q.kind==='pattern'?' · รูปประโยค':' · คำศัพท์');
+  el('fi-bar').style.width = (fi.i/fi.qs.length*100)+'%';
+  el('fi-hint').innerHTML = '<i class="fa-solid fa-lightbulb text-amber-400"></i> '+esc(q.hint);
+  el('fi-question').innerText = q.q;
+  el('fi-questh').innerText = q.qth;
+  el('fi-feedback').innerHTML=''; el('fi-next').classList.add('hidden');
+  const box = el('fi-answerbox');
+  if(el('fi-mode').value==='choice'){
+    box.innerHTML = '<div class="grid grid-cols-2 gap-2.5">'+q.options.map((o,ix)=>
+      '<button onclick="answerFillIdx(this,'+ix+')" class="fi-opt font-zh text-xl py-4 rounded-2xl font-semibold tap" style="background:var(--soft);border:1px solid var(--line)">'+esc(o)+'</button>').join('')+'</div>';
+  } else {
+    box.innerHTML = '<div class="flex gap-2">'
+      + '<input id="fi-input" onkeydown="if(event.key===\'Enter\')answerFill(null,this.value)" placeholder="พิมพ์คำที่หายไป" class="font-zh flex-1 rounded-2xl px-4 py-3 text-xl" style="background:var(--soft);border:1px solid var(--line)">'
+      + '<button onclick="answerFill(null,document.getElementById(\'fi-input\').value)" class="px-5 bg-blue-600 text-white rounded-2xl font-semibold tap">ตรวจ</button></div>';
+  }
+}
+function answerFillIdx(btn, ix){ answerFill(btn, fi.qs[fi.i].options[ix]); }
+function answerFill(btn, val){
+  if(fi.answered) return;
+  const q = fi.qs[fi.i], given = String(val||'').trim().replace(/\s+/g,'');
+  if(!given) return;
+  fi.answered = true;
+  const ok = given === q.ans;
+  if(ok){ fi.score++; S.stats.correct++; saveStore(); renderStats(); el('fi-score').innerText=fi.score; }
+  document.querySelectorAll('.fi-opt').forEach(b=>{
+    b.disabled = true;
+    if(b.innerText.trim()===q.ans) b.setAttribute('style','background:rgba(16,185,129,.15);border:2px solid #10b981;color:#059669');
+    else if(b===btn) b.setAttribute('style','background:rgba(244,63,94,.12);border:2px solid #f43f5e;color:#e11d48');
+    else b.setAttribute('style','background:var(--soft);border:1px solid var(--line);opacity:.5');
+  });
+  const inp = el('fi-input');
+  if(inp){ inp.disabled=true; inp.setAttribute('style','background:var(--soft);border:2px solid '+(ok?'#10b981':'#f43f5e')); }
+  el('fi-feedback').innerHTML =
+    '<div class="fade-in rounded-2xl p-4" style="background:'+(ok?'rgba(16,185,129,.12)':'rgba(245,158,11,.12)')+';border:1px solid '+(ok?'rgba(16,185,129,.35)':'rgba(245,158,11,.35)')+'">'
+    + '<p class="font-semibold text-sm mb-2 '+(ok?'text-emerald-600':'text-amber-600')+'">'
+    + (ok?'<i class="fa-solid fa-circle-check"></i> ถูกต้อง! เก่งมาก':'<i class="fa-solid fa-circle-info"></i> คำตอบที่ถูกคือ 「'+esc(q.ans)+'」 ไม่เป็นไรนะ')
+    + '</p>'
+    + '<p class="font-zh text-base">'+esc(q.full)+'</p>'
+    + '<p class="text-xs" style="color:var(--mut)">'+esc(q.fullPy)+'</p>'
+    + '<p class="text-xs mt-1" style="color:var(--mut)">'+esc(q.qth)+'</p>'
+    + '<button onclick="speakZh(currentFillAudio())" class="mt-2 text-xs text-blue-600 px-3 py-2 rounded-full" style="background:var(--card);border:1px solid var(--line)"><i class="fa-solid fa-volume-high"></i> ฟังประโยคเต็ม</button></div>';
+  speakZh(q.full);
+  el('fi-next').classList.remove('hidden');
+}
+function nextFill(){
+  if(fi.i >= fi.qs.length-1){ el('fi-bar').style.width='100%'; showPraise(fi.score, fi.qs.length, 'เติมคำ', startFill); return; }
+  fi.i++; renderFill();
+}
+
+/* ============================================================
+   3) แต่งประโยคเอง
+   ============================================================ */
+let wr = { item:null, n:0 };
+function writeDeck(){
+  if(el('wr-kind').value==='situation'){
+    const list = WRITING_SEED.filter(w=>S.levels.includes(w.level));
+    return list.length?list:WRITING_SEED;
+  }
+  return safePool().map(v=>({ level:v.level,
+    th:'ลองแต่งประโยค 1 ประโยคโดยใช้คำว่า 「'+v.hanzi+'」('+v.th+')',
+    zh:'用「'+v.hanzi+'」造一个句子。', must:[v.hanzi],
+    hint:'นึกถึงสถานการณ์จริงที่เคยเจอ แล้วใส่คำนี้ลงไป', models:[v.sent] }));
+}
+function startWrite(){ wr.n=0; nextWrite(); }
+function nextWrite(){
+  const deck = writeDeck(); if(!deck.length) return;
+  wr.item = rnd(deck); wr.n++;
+  const it = wr.item, lv = el('wr-lvl');
+  lv.innerText='HSK '+it.level;
+  lv.className='px-2.5 py-1 rounded-full text-[11px] font-semibold '+(LEVEL_CLS[it.level]||'bg-slate-100');
+  el('wr-count').innerText='โจทย์ที่ '+wr.n;
+  el('wr-th').innerText=it.th; el('wr-zh').innerText=it.zh;
+  el('wr-hint').innerHTML='<i class="fa-solid fa-lightbulb"></i> '+esc(it.hint);
+  el('wr-must').innerHTML = (it.must||[]).length
+    ? '<span class="text-[11px] self-center me-1" style="color:var(--dim)">ต้องมีคำนี้:</span>'+it.must.map(m=>'<span class="font-zh px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold">'+esc(m)+'</span>').join('')
+    : '<span class="text-[11px]" style="color:var(--dim)">แต่งได้อิสระ ไม่บังคับคำ</span>';
+  el('wr-input').value=''; el('wr-feedback').innerHTML='';
+  renderSaved();
+}
+function checkWrite(){
+  const it = wr.item; if(!it) return;
+  const raw = el('wr-input').value.trim();
+  if(!raw){ el('wr-feedback').innerHTML='<p class="text-sm text-amber-600">ลองพิมพ์ประโยคก่อนนะ ผิดถูกไม่เป็นไรเลย 😊</p>'; return; }
+  const hanziOnly = raw.replace(/[，。！？、,.!?\s]/g,'');
+  const checks = [];
+  (it.must||[]).forEach(m=> checks.push({ ok: raw.includes(m), txt:'ใช้คำว่า 「'+m+'」 ในประโยค' }));
+  checks.push({ ok:/[一-鿿]/.test(raw), txt:'เขียนเป็นตัวอักษรจีน' });
+  checks.push({ ok:hanziOnly.length>=5, txt:'ประโยคยาวพอ (อย่างน้อย 5 ตัวอักษร)' });
+  checks.push({ ok:/[我你他她我们你们他们公司经理同事客户大家这那]/.test(raw), txt:'มีประธานชัดเจน เช่น 我 / 经理 / 客户' });
+  checks.push({ ok:/[。！？]$/.test(raw), txt:'จบประโยคด้วย 。! หรือ ？' });
+  const nonCjk = raw.replace(/[一-鿿　-〿，。！？、：；“”‘’（）\s0-9A-Za-z%]/g,'');
+  if(nonCjk.length) checks.push({ ok:false, txt:'มีตัวอักษรที่ไม่ใช่ภาษาจีนปนอยู่' });
+  const pct = Math.round(checks.filter(c=>c.ok).length/checks.length*100);
+  const tone = pct>=80 ? ['rgba(16,185,129,.12)','rgba(16,185,129,.35)','text-emerald-600']
+             : pct>=50 ? ['rgba(59,130,246,.12)','rgba(59,130,246,.35)','text-blue-600']
+                       : ['rgba(245,158,11,.12)','rgba(245,158,11,.35)','text-amber-600'];
+  const head = pct>=80 ? 'เยี่ยมมาก! ประโยคนี้ใช้ได้เลย 🎉' : pct>=50 ? 'ดีแล้ว! เหลืออีกนิดเดียว 💪' : 'กล้าลงมือแล้วคือเก่งแล้วนะ ✨';
+  el('wr-feedback').innerHTML =
+    '<div class="fade-in rounded-2xl p-4" style="background:'+tone[0]+';border:1px solid '+tone[1]+'">'
+    + '<p class="font-semibold mb-2 '+tone[2]+'">'+head+'</p><ul class="space-y-1 mb-3">'
+    + checks.map(c=>'<li class="text-sm flex items-start gap-2"><i class="fa-solid '+(c.ok?'fa-circle-check text-emerald-500':'fa-circle-exclamation text-amber-400')+' mt-1"></i><span>'+esc(c.txt)+'</span></li>').join('')
+    + '</ul><div class="rounded-xl p-3" style="background:var(--card);border:1px solid var(--line)">'
+    + '<p class="text-[11px] mb-1" style="color:var(--dim)">ประโยคของน้อง</p><p class="font-zh text-lg">'+esc(raw)+'</p></div>'
+    + '<div class="rounded-xl p-3 mt-2" style="background:var(--card);border:1px solid var(--line)">'
+    + '<p class="text-[11px] mb-1" style="color:var(--dim)">ตัวอย่างที่เจ้าของภาษาใช้ (เทียบดู ไม่ต้องเหมือนเป๊ะ)</p>'
+    + (it.models||[]).map((m,ix)=>'<p class="font-zh text-base mb-1">'+esc(m)+' <button onclick="speakModel('+ix+')" class="text-blue-500 text-xs"><i class="fa-solid fa-volume-high"></i></button></p>').join('')
+    + '</div><div class="flex flex-wrap gap-2 mt-3">'
+    + '<button onclick="speakZh(document.getElementById(\'wr-input\').value)" class="text-xs px-3 py-2 rounded-lg font-medium" style="background:var(--card);border:1px solid var(--line)"><i class="fa-solid fa-volume-high"></i> ฟังประโยคของฉัน</button>'
+    + '<button onclick="nextWrite()" class="text-xs px-3 py-2 rounded-lg font-medium" style="background:var(--ink);color:var(--card)">โจทย์ถัดไป</button></div></div>';
+  saveSentence(true);
+}
+function speakModel(ix){ const it=wr.item; if(it && it.models && it.models[ix]) speakZh(it.models[ix]); }
+function saveSentence(silent){
+  const raw = el('wr-input').value.trim();
+  if(!raw || !wr.item) return;
+  const last = S.saved[0];
+  if(last && last.sentence===raw && last.prompt===wr.item.th){ if(!silent) renderSaved(); return; }
+  S.saved.unshift({ at:new Date().toLocaleString('th-TH'), level:wr.item.level, prompt:wr.item.th,
+                    must:(wr.item.must||[]).join(' '), sentence:raw });
+  S.stats.sentences = S.saved.length;
+  saveStore(); renderSaved(); renderStats();
+}
+function renderSaved(){
+  el('wr-saved-n').innerText = S.saved.length;
+  const box = el('wr-saved-list');
+  if(!S.saved.length){ box.innerHTML='<p class="text-xs" style="color:var(--dim)">ยังไม่มีประโยคที่บันทึกไว้ — ลองแต่งประโยคแรกกันเลย!</p>'; return; }
+  box.innerHTML = S.saved.slice(0,30).map((s,ix)=>
+    '<div class="rounded-xl p-3" style="border:1px solid var(--line)">'
+    + '<p class="font-zh text-base">'+esc(s.sentence)+' <button onclick="speakSaved('+ix+')" class="text-blue-500 text-xs"><i class="fa-solid fa-volume-high"></i></button></p>'
+    + '<p class="text-[11px] mt-1" style="color:var(--dim)">HSK '+s.level+' · '+esc(s.prompt)+'</p></div>').join('');
+}
+function speakSaved(ix){ if(S.saved[ix]) speakZh(S.saved[ix].sentence); }
+function clearSentences(){
+  if(!confirm('ลบประโยคที่บันทึกไว้ทั้งหมด?')) return;
+  S.saved=[]; S.stats.sentences=0; saveStore(); renderSaved(); renderStats();
+}
+function exportSentences(){
+  if(!S.saved.length){ alert('ยังไม่มีประโยคที่บันทึกไว้'); return; }
+  const ws = XLSX.utils.json_to_sheet(S.saved.map(s=>({'วันเวลา':s.at,'ระดับ':'HSK '+s.level,'โจทย์':s.prompt,'คำที่ต้องใช้':s.must,'ประโยคที่แต่ง':s.sentence,'ความเห็นครู':''})));
+  ws['!cols']=[{wch:20},{wch:9},{wch:46},{wch:14},{wch:40},{wch:30}];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'ประโยคของนักเรียน');
+  XLSX.writeFile(wb, 'ประโยคที่นักเรียนแต่ง.xlsx');
+}
+
+/* ============================================================
+   4) บทสนทนาในที่ทำงาน (3 ขั้น: เตรียมคำศัพท์ → อ่านบท → สวมบทบาท)
+   ============================================================ */
+let dlg = { cur:null, step:1, showPy:true, showTh:true, rp:null };
+const STEPS = [ {n:1,t:'เตรียมคำศัพท์'}, {n:2,t:'อ่านบทสนทนา'}, {n:3,t:'สวมบทบาท'} ];
+
+function renderDlgList(){
+  el('dlg-detail').classList.add('hidden');
+  const list = el('dlg-list'); list.classList.remove('hidden');
+  list.innerHTML = DIALOGUE_SEED.map(d=>
+    '<button onclick="openDlg(\''+d.id+'\')" class="card p-4 text-left">'
+    + '<div class="flex items-start gap-3">'
+    + '<span class="text-3xl">'+d.emoji+'</span>'
+    + '<div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1">'
+    + '<h3 class="font-semibold text-[15px]">'+esc(d.title)+'</h3>'
+    + '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold '+LEVEL_CLS[d.level]+'">HSK '+d.level+'</span></div>'
+    + '<p class="text-xs leading-relaxed" style="color:var(--mut)">'+esc(d.story.slice(0,90))+'…</p>'
+    + '<div class="flex flex-wrap gap-1 mt-2">'+d.keyWords.slice(0,4).map(k=>'<span class="font-zh text-[11px] px-2 py-0.5 rounded" style="background:var(--soft)">'+esc(k)+'</span>').join('')+'</div>'
+    + '</div></div></button>').join('');
+}
+function openDlg(id){
+  dlg.cur = DIALOGUE_SEED.find(d=>d.id===id); dlg.step=1; dlg.rp=null;
+  el('dlg-list').classList.add('hidden');
+  el('dlg-detail').classList.remove('hidden');
+  renderDlg();
+}
+function dlgStep(n){ dlg.step=n; if(n!==3) dlg.rp=null; renderDlg(); try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){} }
+function speakDlgLine(i){ const l=dlg.cur.lines[i]; if(l) speakZh(l.hz); }
+function speakWordAt(kind,i){
+  const d=dlg.cur;
+  if(kind==='p'){ const p=d.phrases[i]; if(p) speakZh(p.hz); }
+  else { const w=d.keyWords[i]; if(w) speakZh(w); }
+}
+function renderDlg(){
+  const d = dlg.cur;
+  let h = '<div class="space-y-3">'
+    + '<button onclick="renderDlgList()" class="text-sm" style="color:var(--mut)"><i class="fa-solid fa-arrow-left"></i> กลับไปเลือกบทสนทนา</button>'
+    + '<div class="card p-4"><div class="flex items-center gap-3 mb-3"><span class="text-3xl">'+d.emoji+'</span>'
+    + '<div><h2 class="font-bold">'+esc(d.title)+'</h2>'
+    + '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold '+LEVEL_CLS[d.level]+'">HSK '+d.level+'</span></div></div>'
+    + '<p class="text-sm leading-relaxed rounded-xl p-3" style="background:var(--soft);color:var(--mut)"><i class="fa-solid fa-book-open"></i> '+esc(d.story)+'</p>'
+    + '<div class="flex items-center gap-1 mt-3">'
+    + STEPS.map(s=>'<button onclick="dlgStep('+s.n+')" class="flex-1 flex items-center gap-1.5 justify-center py-2 rounded-xl text-[11px] font-semibold" style="'
+        + (dlg.step===s.n?'background:var(--brand);color:#fff':'background:var(--soft);color:var(--mut)')+'">'
+        + '<span class="step-dot" style="'+(dlg.step===s.n?'background:rgba(255,255,255,.25)':'background:var(--card)')+'">'+s.n+'</span>'+s.t+'</button>').join('')
+    + '</div></div>';
+
+  if(dlg.step===1){
+    const words = d.keyWords.map((k,i)=>{
+      const g = glossOf(k);
+      return '<div class="rounded-2xl p-3 flex items-start gap-3" style="background:var(--soft);border:1px solid var(--line)">'
+        + '<button onclick="speakWordAt(\'w\','+i+')" class="w-10 h-10 rounded-xl text-blue-600 shrink-0" style="background:var(--card);border:1px solid var(--line)"><i class="fa-solid fa-volume-high"></i></button>'
+        + '<div class="min-w-0"><p class="font-zh text-xl font-bold leading-tight">'+esc(k)+'</p>'
+        + '<p class="text-sm text-indigo-600">'+esc(g?g.pinyin:'')+'</p>'
+        + '<p class="text-sm font-medium">'+esc(g?g.th:'')+'</p>'
+        + (g&&g.sent?'<p class="font-zh text-[11px] mt-1" style="color:var(--dim)">'+esc(g.sent)+'</p>':'')
+        + '</div></div>';
+    }).join('');
+    const phrases = (d.phrases||[]).map((p,i)=>
+      '<div class="rounded-2xl p-3 flex items-start gap-3" style="background:var(--soft);border:1px solid var(--line)">'
+      + '<button onclick="speakWordAt(\'p\','+i+')" class="w-10 h-10 rounded-xl text-blue-600 shrink-0" style="background:var(--card);border:1px solid var(--line)"><i class="fa-solid fa-volume-high"></i></button>'
+      + '<div class="min-w-0"><p class="font-zh text-lg font-bold leading-tight">'+esc(p.hz)+'</p>'
+      + '<p class="text-sm text-indigo-600">'+esc(p.py)+'</p>'
+      + '<p class="text-sm font-medium">'+esc(p.th)+'</p></div></div>').join('');
+    h += '<div class="card p-4">'
+      + '<p class="text-xs mb-3" style="color:var(--mut)">อ่านออกเสียงตามทีละคำก่อนนะ แตะปุ่มลำโพงเพื่อฟังเสียงเจ้าของภาษา แล้วพูดตาม 2-3 รอบ</p>'
+      + '<h3 class="font-semibold text-sm mb-2"><i class="fa-solid fa-list text-blue-600"></i> คำศัพท์ที่เกี่ยวข้อง ('+d.keyWords.length+' คำ)</h3>'
+      + '<div class="grid grid-cols-1 gap-2 mb-5">'+words+'</div>'
+      + '<h3 class="font-semibold text-sm mb-2"><i class="fa-solid fa-quote-left text-violet-500"></i> วลีที่ใช้บ่อยในบทนี้</h3>'
+      + '<div class="grid grid-cols-1 gap-2">'+phrases+'</div>'
+      + '<button onclick="dlgStep(2)" class="w-full mt-5 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl tap">อ่านคำศัพท์ครบแล้ว ไปอ่านบทสนทนา <i class="fa-solid fa-arrow-right"></i></button>'
+      + '</div>';
+  }
+
+  if(dlg.step===2){
+    h += '<div class="card p-4">'
+      + '<p class="text-xs font-semibold mb-1" style="color:var(--mut)">เป้าหมายของบทนี้</p>'
+      + '<ul class="text-sm space-y-1 mb-3">'+d.goal.map(g=>'<li><i class="fa-solid fa-circle-check text-emerald-400 me-1"></i> '+esc(g)+'</li>').join('')+'</ul>'
+      + '<div class="flex flex-wrap gap-2 mb-4 pb-3" style="border-bottom:1px solid var(--line)">'
+      + '<button onclick="playWholeDialog()" class="text-xs px-3 py-2 rounded-lg bg-blue-600 text-white font-medium"><i class="fa-solid fa-play"></i> ฟังทั้งบท</button>'
+      + '<button onclick="dlg.showPy=!dlg.showPy;renderDlg()" class="text-xs px-3 py-2 rounded-lg font-medium" style="'+(dlg.showPy?'background:var(--ink);color:var(--card)':'background:var(--soft);border:1px solid var(--line)')+'">พินอิน</button>'
+      + '<button onclick="dlg.showTh=!dlg.showTh;renderDlg()" class="text-xs px-3 py-2 rounded-lg font-medium" style="'+(dlg.showTh?'background:var(--ink);color:var(--card)':'background:var(--soft);border:1px solid var(--line)')+'">คำแปลไทย</button>'
+      + '</div><div class="space-y-3">'
+      + d.lines.map((l,i)=>{
+          const role = d.roles.find(r=>r.key===l.r)||{name:l.r};
+          const mine = i%2===0;
+          const color = l.r==='A'?'#3b82f6':l.r==='B'?'#10b981':'#f59e0b';
+          return '<div class="flex gap-2.5'+(mine?'':' flex-row-reverse')+'">'
+            + '<div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:'+color+'">'+esc(l.r)+'</div>'
+            + '<div class="flex-1'+(mine?'':' text-right')+'">'
+            + '<p class="text-[11px] mb-0.5" style="color:var(--dim)">'+esc(role.name)+'</p>'
+            + '<div class="inline-block rounded-2xl px-3.5 py-2.5 text-left" style="background:var(--soft);border:1px solid var(--line)" onclick="speakDlgLine('+i+')">'
+            + '<p class="font-zh text-[17px] leading-relaxed">'+esc(l.hz)+' <i class="fa-solid fa-volume-high text-[11px] text-blue-400"></i></p>'
+            + (dlg.showPy?'<p class="text-[11px] text-indigo-500 mt-0.5">'+esc(l.py)+'</p>':'')
+            + (dlg.showTh?'<p class="text-xs mt-0.5" style="color:var(--mut)">'+esc(l.th)+'</p>':'')
+            + '</div></div></div>';
+        }).join('')
+      + '</div>'
+      + '<div class="grid grid-cols-2 gap-2 mt-5">'
+      + '<button onclick="dlgStep(1)" class="py-3 rounded-2xl text-sm font-medium tap" style="background:var(--soft);border:1px solid var(--line)"><i class="fa-solid fa-arrow-left"></i> ทบทวนคำศัพท์</button>'
+      + '<button onclick="dlgStep(3)" class="py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-2xl tap">สวมบทบาท <i class="fa-solid fa-arrow-right"></i></button>'
+      + '</div></div>';
+  }
+
+  if(dlg.step===3){
+    h += '<div class="card p-4">'
+      + '<h3 class="font-semibold mb-1"><i class="fa-solid fa-masks-theater text-violet-500"></i> โหมดสวมบทบาท</h3>'
+      + '<p class="text-xs mb-3" style="color:var(--mut)">เลือกตัวละครที่อยากเล่น ระบบจะพูดบทของอีกฝ่ายให้ แล้วถึงตาน้องพูดเอง</p>'
+      + '<div class="grid grid-cols-1 gap-2">'
+      + d.roles.map(r=>'<button onclick="startRolePlay(\''+r.key+'\')" class="px-4 py-3 rounded-2xl text-sm font-medium text-left tap" style="background:var(--soft);border:1px solid var(--line)">'
+          + esc(r.name)+'<span class="block text-[11px]" style="color:var(--dim)">'+esc(r.note)+'</span></button>').join('')
+      + '</div><div id="rp-panel" class="mt-4"></div></div>';
+  }
+
+  h += '</div>';
+  el('dlg-detail').innerHTML = h;
+  if(dlg.step===3 && dlg.rp) rpStep();
+}
+function playWholeDialog(){
+  const d = dlg.cur; let i = 0;
+  if(S.audioMode==='online' || !hasTTS){ // เสียงออนไลน์เล่นทีละประโยคไม่ได้ต่อเนื่อง — อ่านรวมทีเดียว
+    speakZh(d.lines.map(l=>l.hz).join(' ').slice(0,170)); return;
+  }
+  stopSpeaking();
+  const step = ()=>{
+    if(i>=d.lines.length) return;
+    const u = new SpeechSynthesisUtterance(d.lines[i].hz);
+    u.lang='zh-CN'; u.rate=0.85; if(voiceZh) u.voice=voiceZh;
+    u.onend = ()=>{ i++; setTimeout(step,420); };
+    u.onerror = ()=>{};
+    speechSynthesis.speak(u);
+  };
+  step();
+}
+function startRolePlay(roleKey){ dlg.rp = { role:roleKey, i:0 }; rpStep(); }
+function rpStep(){
+  const d = dlg.cur, rp = dlg.rp, panel = el('rp-panel');
+  if(!rp || !panel) return;
+  if(rp.i >= d.lines.length){
+    panel.innerHTML = '<div class="rounded-2xl p-5 text-center" style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35)">'
+      + '<p class="text-3xl mb-2">🎊</p><p class="font-semibold text-emerald-600">จบบทสนทนาแล้ว! น้องพูดจบทั้งบทได้เลยนะ</p>'
+      + '<button onclick="startRolePlay(\''+rp.role+'\')" class="mt-3 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold">เล่นอีกรอบ</button></div>';
+    showPraise(1,1,'สวมบทบาท', ()=>startRolePlay(rp.role));
+    return;
+  }
+  const l = d.lines[rp.i], role = d.roles.find(r=>r.key===l.r)||{name:l.r}, mine = l.r===rp.role;
+  const head = '<div class="flex justify-between text-[11px] mb-2" style="color:var(--dim)"><span>บรรทัด '+(rp.i+1)+' / '+d.lines.length+'</span>'
+    + '<button onclick="dlg.rp=null;document.getElementById(\'rp-panel\').innerHTML=\'\'">ออกจากโหมดนี้</button></div>'
+    + '<div class="w-full rounded-full h-1.5 mb-3 overflow-hidden" style="background:var(--line)"><div class="h-1.5" style="width:'+(rp.i/d.lines.length*100)+'%;background:#8b5cf6"></div></div>';
+  if(!mine){
+    panel.innerHTML = head + '<div class="rounded-2xl p-4" style="background:var(--soft);border:1px solid var(--line)">'
+      + '<p class="text-[11px] mb-1" style="color:var(--dim)">'+esc(role.name)+' พูดว่า</p>'
+      + '<p class="font-zh text-xl mb-1">'+esc(l.hz)+'</p>'
+      + '<p class="text-xs text-indigo-500">'+esc(l.py)+'</p><p class="text-xs" style="color:var(--mut)">'+esc(l.th)+'</p>'
+      + '<div class="grid grid-cols-2 gap-2 mt-3">'
+      + '<button onclick="speakDlgLine('+rp.i+')" class="py-2.5 rounded-xl text-xs font-medium" style="background:var(--card);border:1px solid var(--line)"><i class="fa-solid fa-volume-high"></i> ฟังอีกครั้ง</button>'
+      + '<button onclick="rpNext()" class="py-2.5 rounded-xl text-xs font-semibold" style="background:var(--ink);color:var(--card)">ต่อไป <i class="fa-solid fa-arrow-right"></i></button>'
+      + '</div></div>';
+    speakZh(l.hz);
+  } else {
+    panel.innerHTML = head + '<div class="rounded-2xl p-4 text-center" style="background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.35)">'
+      + '<p class="text-[11px] text-violet-500 mb-1">ถึงตาน้องพูดแล้ว! ('+esc(role.name)+')</p>'
+      + '<p class="font-zh text-2xl mb-1">'+esc(l.hz)+'</p>'
+      + '<p class="text-xs text-indigo-500">'+esc(l.py)+'</p><p class="text-xs mb-3" style="color:var(--mut)">'+esc(l.th)+'</p>'
+      + '<button id="rp-mic" onclick="rpListen()" class="w-20 h-20 bg-gradient-to-tr from-rose-500 to-red-600 text-white rounded-full text-2xl shadow-lg mx-auto flex items-center justify-center"><i class="fa-solid fa-microphone"></i></button>'
+      + '<p id="rp-status" class="text-[11px] mt-2" style="color:var(--dim)">แตะไมค์แล้วพูดตามประโยคด้านบน</p>'
+      + '<div id="rp-result" class="text-sm font-semibold mt-1"></div>'
+      + '<div class="grid grid-cols-2 gap-2 mt-3">'
+      + '<button onclick="speakDlgLine('+rp.i+')" class="py-2.5 rounded-xl text-xs font-medium" style="background:var(--card);border:1px solid var(--line)"><i class="fa-solid fa-volume-high"></i> ฟังตัวอย่าง</button>'
+      + '<button onclick="rpNext()" class="py-2.5 rounded-xl text-xs font-semibold" style="background:var(--ink);color:var(--card)">ข้าม/ต่อไป <i class="fa-solid fa-arrow-right"></i></button>'
+      + '</div></div>';
+  }
+}
+function rpNext(){ if(!dlg.rp) return; micStop(); dlg.rp.i++; rpStep(); }
+function rpListen(){
+  const l = dlg.cur.lines[dlg.rp.i];
+  micListen(l.hz, (ok, heard)=>{
+    const r = el('rp-result'); if(!r) return;
+    if(ok){ r.innerHTML='<span class="text-emerald-600">✅ ออกเสียงดีมาก! “'+esc(heard)+'”</span>';
+      S.stats.speak++; saveStore(); renderStats();
+      setTimeout(()=>{ if(dlg.rp) rpNext(); }, 1200);
+    } else { r.innerHTML='<span class="text-amber-600">ได้ยินว่า “'+esc(heard||'—')+'” ใกล้แล้ว ลองอีกครั้งนะ</span>'; }
+  }, 'rp-status');
+}
+
+/* ============================================================
+   5) ฝึกพูดกับไมค์
+   ============================================================ */
+let sp = { list:[], i:0, score:0, done:0 };
+function startSpeak(){
+  const kind = el('sp-kind').value;
+  let list = [];
+  if(kind==='words') list = safePool().map(v=>({hz:v.hanzi, py:v.pinyin, th:v.th, tag:'คำศัพท์ HSK '+v.level}));
+  else if(kind==='sentences') list = safePool().filter(v=>v.sent).map(v=>({hz:v.sent, py:v.sentPy, th:v.sentTh, tag:'ประโยค HSK '+v.level}));
+  else DIALOGUE_SEED.filter(d=>S.levels.includes(d.level)).forEach(d=>d.lines.forEach(l=>list.push({hz:l.hz,py:l.py,th:l.th,tag:d.emoji+' '+d.title})));
+  if(!list.length) list = VOCAB_SEED.slice(0,10).map(v=>({hz:v.hanzi,py:v.pinyin,th:v.th,tag:'คำศัพท์'}));
+  sp = { list:shuf(list), i:0, score:0, done:0 };
+  el('sp-score').innerText = 0;
+  showSpeak();
+}
+function showSpeak(){
+  const it = sp.list[sp.i]; if(!it) return;
+  el('sp-tag').innerText = it.tag;
+  el('sp-hanzi').innerText = it.hz;
+  el('sp-pinyin').innerText = it.py;
+  el('sp-th').innerText = it.th;
+  el('sp-heard').innerText = '—';
+  el('sp-result').innerHTML = '';
+  el('sp-status').innerText = 'แตะไมโครโฟน แล้วออกเสียงตามด้านบน';
+}
+function toggleMic(){
+  const it = sp.list[sp.i]; if(!it) return;
+  if(Mic.active || Mic.starting){ micStop(); return; }
+  el('sp-heard').innerText = '…'; el('sp-result').innerHTML='';
+  micListen(it.hz, (ok, heard)=>{
+    el('sp-heard').innerText = heard || '—';
+    const r = el('sp-result');
+    if(ok){
+      r.innerHTML = '<span class="text-emerald-600"><i class="fa-solid fa-circle-check"></i> ออกเสียงดีมาก! 很好！</span>';
+      sp.score++; S.stats.speak++; saveStore(); renderStats();
+      el('sp-score').innerText = sp.score;
+      setTimeout(()=>nextSpeak(), 1300);
+    } else {
+      r.innerHTML = '<span class="text-amber-600"><i class="fa-solid fa-triangle-exclamation"></i> ใกล้แล้ว! ลองพูดช้าลงและชัดขึ้นอีกนิด</span>';
+    }
+  }, 'sp-status');
+}
+function skipSpeak(){ micStop(); advanceSpeak(); }
+function nextSpeak(){ micStop(); advanceSpeak(); }
+function advanceSpeak(){
+  sp.done++;
+  if(sp.done >= 10 || sp.i >= sp.list.length-1){
+    showPraise(sp.score, Math.min(sp.done,10), 'ฝึกพูด', startSpeak);
+    sp.i = 0; sp.done = 0; sp.score = 0; el('sp-score').innerText = 0; showSpeak(); return;
+  }
+  sp.i++; showSpeak();
+}
+
+/* ============================================================
+   6) คลังคำศัพท์ + Excel
+   ============================================================ */
+function setBankView(v){
+  el('bk-view').value = v;
+  el('bkv-vocab').classList.toggle('on', v==='vocab');
+  el('bkv-pattern').classList.toggle('on', v==='pattern');
+  renderBank();
+}
+function renderBank(){
+  const q = (el('bk-search').value||'').toLowerCase().trim();
+  const view = el('bk-view').value || 'vocab';
+  const grid = el('bk-grid');
+  if(view==='pattern'){
+    const list = patternPool().filter(p=> !q || p.pattern.includes(q) || p.pinyin.toLowerCase().includes(q) || p.th.toLowerCase().includes(q));
+    grid.innerHTML = list.length ? list.map((p,ix)=>
+      '<div class="card p-4"><div class="flex justify-between items-start mb-2">'
+      + '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold '+LEVEL_CLS[p.level]+'">HSK '+p.level+'</span>'
+      + '<button onclick="speakPattern('+ix+')" class="w-9 h-9 rounded-lg text-blue-600" style="background:var(--soft)"><i class="fa-solid fa-volume-high"></i></button></div>'
+      + '<h3 class="font-zh text-xl font-bold mb-1">'+esc(p.pattern)+'</h3>'
+      + '<p class="text-sm text-indigo-600 mb-1">'+esc(p.pinyin)+'</p>'
+      + '<p class="text-sm font-semibold mb-2">'+esc(p.th)+'</p>'
+      + '<p class="text-xs mb-2" style="color:var(--mut)">'+esc(p.use)+'</p>'
+      + '<div class="rounded-xl p-2.5" style="background:var(--soft);border:1px solid var(--line)">'
+      + '<p class="font-zh text-sm">'+esc(p.sent)+'</p><p class="text-[11px]" style="color:var(--dim)">'+esc(p.sentPy)+'</p>'
+      + '<p class="text-[11px] mt-0.5" style="color:var(--mut)">'+esc(p.sentTh)+'</p></div></div>').join('') : emptyBox();
+    bankCache = list; return;
+  }
+  const list = pool().filter(v=> !q || v.hanzi.includes(q) || (v.pinyin||'').toLowerCase().includes(q) || (v.th||'').toLowerCase().includes(q) || (v.sent||'').includes(q));
+  bankCache = list;
+  grid.innerHTML = list.length ? list.map((v,ix)=>{
+    const cl = CAT_LABEL[v.cat] || {th:v.cat||'อื่น ๆ',emoji:'📚',cls:'bg-slate-100'};
+    return '<div class="card p-4"><div class="flex justify-between items-start mb-2 gap-2"><div class="flex flex-wrap gap-1">'
+      + '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold '+(LEVEL_CLS[v.level]||'bg-slate-100')+'">HSK '+v.level+'</span>'
+      + '<span class="px-2 py-0.5 rounded-full text-[11px] font-medium '+cl.cls+'">'+cl.emoji+' '+cl.th+'</span></div>'
+      + '<button onclick="speakBank('+ix+')" class="w-9 h-9 rounded-lg text-blue-600 shrink-0" style="background:var(--soft)"><i class="fa-solid fa-volume-high"></i></button></div>'
+      + '<h3 class="font-zh text-2xl font-bold mb-1">'+esc(v.hanzi)+'</h3>'
+      + '<p class="text-sm font-medium text-indigo-600 mb-1">'+esc(v.pinyin)+'</p>'
+      + '<p class="text-sm font-semibold mb-3">'+esc(v.th)+'</p>'
+      + '<div class="rounded-xl p-2.5" style="background:var(--soft);border:1px solid var(--line)">'
+      + '<p class="text-xs font-zh">'+esc(v.sent||'')+'</p>'
+      + '<p class="text-[11px]" style="color:var(--dim)">'+esc(v.sentPy||'')+'</p>'
+      + '<p class="text-[11px] mt-0.5" style="color:var(--mut)">'+esc(v.sentTh||'')+'</p></div></div>';
+  }).join('') : emptyBox();
+}
+let bankCache = [];
+function speakBank(ix){ const v=bankCache[ix]; if(v) speakZh(v.hanzi); }
+function speakPattern(ix){ const p=bankCache[ix]; if(p) speakZh(p.sent); }
+function emptyBox(){ return '<div class="col-span-full py-12 text-center" style="color:var(--dim)"><i class="fa-solid fa-folder-open text-4xl mb-3"></i><p>ไม่พบรายการที่ตรงกับเงื่อนไข</p></div>'; }
+
+const COLS = ['level','cat','hanzi','pinyin','th','sent','sentPy','sentTh'];
+function bankRows(){ return VOCAB().map(v=>({level:v.level,cat:v.cat,hanzi:v.hanzi,pinyin:v.pinyin,th:v.th,sent:v.sent,sentPy:v.sentPy,sentTh:v.sentTh})); }
+function makeWorkbook(rows){
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows,{header:COLS});
+  ws['!cols']=[{wch:12},{wch:16},{wch:12},{wch:18},{wch:30},{wch:30},{wch:34},{wch:34}];
+  XLSX.utils.book_append_sheet(wb, ws, 'vocabulary');
+  const help = [['วิธีใช้ไฟล์นี้'],
+    ['1) แก้ไขหรือเพิ่มแถวในชีต vocabulary ได้เลย ห้ามเปลี่ยนชื่อหัวคอลัมน์แถวแรก'],
+    ['2) level ใส่ได้เฉพาะ 3, 4 หรือ 5'],
+    ['3) cat ใส่ได้: '+Object.keys(CAT_LABEL).join(' / ')],
+    ['4) ประโยคตัวอย่าง (sent) ควรมีคำศัพท์ (hanzi) อยู่จริง เพื่อใช้ออกข้อสอบเติมคำ'],
+    ['5) บันทึกเป็น .xlsx แล้วกดปุ่ม "นำเข้าไฟล์" ในหน้าคลังคำศัพท์'],[''],['หมวดที่ใช้ได้'],
+    ...Object.keys(CAT_LABEL).map(k=>[k, CAT_LABEL[k].th])];
+  const ws2 = XLSX.utils.aoa_to_sheet(help); ws2['!cols']=[{wch:22},{wch:70}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'วิธีใช้');
+  return wb;
+}
+function downloadTemplate(){ XLSX.writeFile(makeWorkbook(bankRows()), 'HSK3-5_คลังคำศัพท์_template.xlsx'); }
+function exportCurrentBank(){ XLSX.writeFile(makeWorkbook(bankRows()), 'HSK3-5_คลังคำศัพท์_ปัจจุบัน.xlsx'); }
+const ALIAS = { level:'level','ระดับ':'level','ระดับ(3/4/5)':'level','ระดับ 3/4/5':'level',hsk:'level',
+  cat:'cat',category:'cat','หมวด':'cat','หมวดหมู่':'cat',
+  hanzi:'hanzi','คำศัพท์':'hanzi','คำศัพท์จีน':'hanzi',chinese:'hanzi',word:'hanzi',
+  pinyin:'pinyin','พินอิน':'pinyin', th:'th',thai:'th','คำแปล':'th','คำแปลไทย':'th',meaning:'th',
+  sent:'sent',sentence:'sent','ประโยค':'sent','ประโยคตัวอย่าง':'sent',
+  sentpy:'sentPy',sentence_pinyin:'sentPy','พินอินประโยค':'sentPy',
+  sentth:'sentTh',sentence_thai:'sentTh','คำแปลประโยค':'sentTh' };
+function importExcel(ev){
+  const f = ev.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = e=>{
+    try{
+      const wb = XLSX.read(e.target.result,{type:'array'});
+      const sheet = wb.Sheets['vocabulary'] || wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(sheet,{defval:''});
+      const rows = [];
+      raw.forEach((r,i)=>{
+        const o = {};
+        Object.keys(r).forEach(k=>{ const key = ALIAS[String(k).trim().toLowerCase()] || ALIAS[String(k).trim()]; if(key) o[key]=String(r[k]).trim(); });
+        if(!o.hanzi || !/[一-鿿]/.test(o.hanzi)) return;
+        rows.push({ id:9000+i, level:Number(o.level)||5, cat:(o.cat||'general').toLowerCase(),
+          hanzi:o.hanzi, pinyin:o.pinyin||'', th:o.th||'', sent:o.sent||'', sentPy:o.sentPy||'', sentTh:o.sentTh||'' });
+      });
+      if(!rows.length){ setBankStatus('ไม่พบข้อมูลที่อ่านได้ ลองใช้เทมเพลตที่ดาวน์โหลดไป', true); return; }
+      S.bank = rows; saveStore(); refreshAll(); switchTab('bank');
+      setBankStatus('นำเข้าสำเร็จ '+rows.length+' คำ 🎉');
+    }catch(err){ setBankStatus('อ่านไฟล์ไม่สำเร็จ: '+err.message, true); }
+  };
+  rd.readAsArrayBuffer(f); ev.target.value='';
+}
+function setBankStatus(msg, bad){
+  const e = el('bk-status'); if(!e) return;
+  e.innerText = msg; e.className = 'text-xs mt-2 font-medium '+(bad?'text-rose-600':'text-emerald-600');
+  setTimeout(()=>{ e.innerText=''; }, 6000);
+}
+function resetBank(){
+  if(!confirm('คืนค่าคลังคำศัพท์กลับเป็นชุดเริ่มต้น?')) return;
+  S.bank=null; saveStore(); refreshAll(); switchTab('bank'); setBankStatus('คืนค่าคลังเริ่มต้นแล้ว');
+}
+
+/* ============================================================
+   คำชม / กำลังใจ
+   ============================================================ */
+let praiseRetry = null;
+function showPraise(score, total, label, retryFn){
+  const pct = total ? score/total : 1;
+  const band = pct>=0.8?'high':pct>=0.5?'mid':'low';
+  const p = rnd(PRAISE[band]);
+  el('pr-emoji').innerText = band==='high'?'🏆':band==='mid'?'🎉':'🌱';
+  el('pr-zh').innerText = p.zh; el('pr-py').innerText = p.py; el('pr-th').innerText = p.th;
+  el('pr-score').innerText = label+' · ได้ '+score+' จาก '+total;
+  el('pr-always').innerText = rnd(PRAISE.always);
+  praiseRetry = retryFn;
+  el('praise').classList.remove('hidden');
+  speakZh(p.zh, 0.95);
+}
+function closePraise(){ el('praise').classList.add('hidden'); }
+function praiseAgain(){ closePraise(); if(praiseRetry) praiseRetry(); }
+
+/* ============================================================
+   เริ่มทำงาน
+   ============================================================ */
+function boot(){
+  loadStore();
+  if(!Array.isArray(S.levels) || !S.levels.length) S.levels=[3,4,5];
+  if(!S.theme) S.theme='light';
+  S.stats.sentences = S.saved.length;
+  applyTheme();
+  document.querySelectorAll('.lvl-btn').forEach(b=>b.classList.toggle('lvl-on', S.levels.includes(Number(b.dataset.lvl))));
+  initAudio();
+  showFileWarning();
+  renderHome(); renderSaved();
+  startFlash(); startFill(); startWrite(); startSpeak(); renderDlgList();
+  switchTab('home');
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ micStop(); stopSpeaking(); } });
+}
+if(typeof window!=='undefined' && window.addEventListener) window.addEventListener('DOMContentLoaded', boot);
+
+</script>
+</body>
+</html>
