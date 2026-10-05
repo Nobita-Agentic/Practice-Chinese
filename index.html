@@ -834,6 +834,16 @@ html.nofa .fa-language::before{content:"拼"}
   <div id="py-body" class="stack"></div>
 </section>
 
+<!-- ======================= ฟัง-พูด ======================= -->
+<section class="screen hide" id="sec-ls">
+  <div id="ls-body" class="stack"></div>
+</section>
+
+<!-- ======================= ห้องครู ======================= -->
+<section class="screen hide" id="sec-teacher">
+  <div id="tc-body" class="stack"></div>
+</section>
+
 <!-- ======================= ความก้าวหน้า ======================= -->
 <section class="screen hide" id="sec-progress">
   <div class="panel pad" style="background:var(--heroBg);color:var(--heroInk);border-color:transparent">
@@ -878,7 +888,7 @@ html.nofa .fa-language::before{content:"拼"}
     <button class="navbtn" id="tab-drill" onclick="switchTab('drill')"><i class="fa-solid fa-pen-to-square"></i><span>ฝึกหัด</span></button>
     <button class="navbtn" id="tab-game" onclick="switchTab('game')"><i class="fa-solid fa-headphones"></i><span>เกม</span></button>
     <button class="navbtn" id="tab-dialog" onclick="switchTab('dialog')"><i class="fa-solid fa-comments"></i><span>สนทนา</span></button>
-    <button class="navbtn" id="tab-speak" onclick="switchTab('speak')"><i class="fa-solid fa-microphone"></i><span>พูด</span></button>
+    <button class="navbtn" id="tab-ls" onclick="switchTab('ls')"><i class="fa-solid fa-ear-listen"></i><span>ฟัง-พูด</span></button>
   </div>
 </nav>
 <button id="tab-bank" class="hide" onclick="switchTab('bank')"></button>
@@ -7390,45 +7400,7 @@ let S = {
 };
 function loadStore(){ try{ const r=localStorage.getItem(STORE_KEY); if(r) S=Object.assign(S,JSON.parse(r)); }catch(e){} }
 function saveStore(){ S._ts = Date.now(); try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){} cloudPush(); }
-
-/* ============================================================
-   ซิงก์ขึ้น Supabase (ไม่ต้องล็อกอิน · anonymous sign-in)
-   localStorage ยังเป็นแคชหลัก ส่วน Supabase เก็บสำเนาไว้บนคลาวด์
-   ============================================================ */
-const SUPABASE_URL = 'https://ppxjxzodfpbmwlujozhn.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_YpcKE1dC9CAnl0LzcXFpAg_EKkrmMH3';
-let sb = null, sbUser = null, sbTimer = null;
-async function cloudInit(){
-  try{
-    if(!window.supabase || SUPABASE_KEY.indexOf('PASTE_')===0) return;
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let { data:{ session } } = await sb.auth.getSession();
-    if(!session){
-      const r = await sb.auth.signInAnonymously();
-      if(r.error) throw r.error;
-      session = r.data.session;
-    }
-    sbUser = session.user;
-    const { data, error } = await sb.from('progress').select('data').eq('user_id', sbUser.id).maybeSingle();
-    if(error) throw error;
-    if(data && data.data && (data.data._ts||0) > (S._ts||0)){
-      S = Object.assign(S, data.data);
-      try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){}
-      applyTheme(); renderLevels(); refreshAll();
-      renderHome(); renderSaved(); renderStats(); renderWeakBanner();
-    } else {
-      cloudPush(0);
-    }
-  }catch(e){ console.warn('Supabase sync off:', e && e.message || e); sb = null; }
-}
-function cloudPush(delay){
-  if(!sb || !sbUser) return;
-  clearTimeout(sbTimer);
-  sbTimer = setTimeout(async ()=>{
-    const { error } = await sb.from('progress').upsert({ user_id: sbUser.id, data: S, updated_at: new Date().toISOString() });
-    if(error) console.warn('Supabase save failed:', error.message);
-  }, delay==null ? 1500 : delay);
-}
+const S_DEFAULT = JSON.stringify(S);     // ค่าเริ่มต้น ใช้ตอนสลับรหัสผู้เรียน (โค้ดซิงก์อยู่ส่วนที่ 14)
 
 const BASE_VOCAB = VOCAB_HSK12.concat(VOCAB_SEED);
 const VOCAB = () => (S.bank && S.bank.length ? S.bank : BASE_VOCAB);
@@ -7678,7 +7650,7 @@ function stamp(id){
 /* ============================================================
    แท็บ / ตัวกรองระดับ-หมวด
    ============================================================ */
-const TABS = ['home','pinyin','flash','drill','game','dialog','speak','bank','progress'];
+const TABS = ['home','pinyin','flash','drill','game','dialog','speak','ls','bank','progress','teacher'];
 let drillView = 'fill';
 function switchTab(t){
   TABS.forEach(x=>{
@@ -7697,6 +7669,8 @@ function switchTab(t){
   if(t==='speak' && !sp.list.length) startSpeak();
   if(t==='bank') renderBank();
   if(t==='progress') renderProgress();
+  if(t==='ls') renderLS();
+  if(t==='teacher') renderTeacher();
   renderWeakBanner();
 }
 function switchDrill(v){
@@ -7754,6 +7728,7 @@ function renderStats(){
 
 /* ---------- หน้าหลัก ---------- */
 const HOME_MENU = [
+  { t:'ฟัง-พูด 听说 (ใหม่)', d:'อ่านตัวจีนไม่ได้ก็ฝึกได้ ฟังให้เข้าใจ พูดให้ชัด 8 หน่วย + แบบทดสอบวัดผล', i:'fa-ear-listen', c:'var(--seal)', go:"switchTab('ls')" },
   { t:'พื้นฐานพินอิน', d:'พยัญชนะ สระ วรรณยุกต์ ตารางผสมเสียง ฟังได้ทุกพยางค์', i:'fa-language', c:'var(--seal)', go:"switchTab('pinyin')" },
   { t:'การ์ดคำศัพท์', d:'ดูตัวจีน เดาความหมาย แล้วพลิกเฉลย', i:'fa-clone', c:'var(--jade)', go:"switchTab('flash')" },
   { t:'ทดสอบตามระดับ', d:'วัดความรู้ HSK 1-5 ทีละระดับ พร้อมสรุปข้อผิด', i:'fa-clipboard-check', c:'var(--gold)', go:"switchTab('drill');switchDrill('test')" },
@@ -9111,7 +9086,7 @@ function onTestMode(){
    ============================================================ */
 const WD = ['อา','จ','อ','พ','พฤ','ศ','ส'];
 const MODE_TH = { flash:'การ์ดคำศัพท์', fill:'เติมคำ', test:'ทดสอบระดับ', bench:'ชุดมาตรฐาน', game:'เกมฟังเสียง', match:'จับคู่', order:'เรียงประโยค',
-  speak:'ฝึกพูด', role:'สวมบทบาท', challenge:'ท้าพูดจีน', speed:'ตอบไว', write:'แต่งประโยค', pinyin:'พื้นฐานพินอิน' };
+  speak:'ฝึกพูด', ls:'ฟัง-พูด', lstest:'แบบทดสอบฟัง-พูด', role:'สวมบทบาท', challenge:'ท้าพูดจีน', speed:'ตอบไว', write:'แต่งประโยค', pinyin:'พื้นฐานพินอิน' };
 function setGoal(n){ S.goal = n; saveStore(); renderProgress(); renderHeroGoal(); }
 function renderProgress(){
   const box = el('prog-body'); if(!box) return;
@@ -9179,8 +9154,9 @@ function renderProgress(){
     + '<label class="field"><span>ชื่อเล่น (ใช้ระบุในไฟล์ที่ส่งออก)</span><input id="prog-nick" value="'+esc(S.nick||'')+'" onchange="S.nick=this.value.trim();saveStore()" placeholder="เช่น มะลิ"></label>'
     + '<div class="btn-row" style="margin-top:10px"><button class="btn" onclick="exportProgress()"><i class="fa-solid fa-file-excel"></i> ส่งออก Excel</button>'
     + '<button class="btn" style="color:var(--seal)" onclick="resetProgress()">ล้างข้อมูลความก้าวหน้า</button></div>'
-    + '<p class="sub" style="margin-top:8px">ข้อมูลเก็บไว้ในเครื่องนี้เท่านั้น ส่งไฟล์ Excel ให้ผู้สอนได้เพื่อดูพัฒนาการ</p></div>';
-  box.innerHTML = h;
+    + '<p class="sub" style="margin-top:8px">'+(myCode()?'ข้อมูลซิงก์กับรหัส '+esc(myCode())+' ผู้สอนดูพัฒนาการได้ในห้องครู':'ยังไม่มีรหัส ข้อมูลเก็บไว้ในเครื่องนี้เท่านั้น')+'</p></div>'
+    + '<button class="btn ghost sm" style="align-self:center" onclick="switchTab(\'teacher\')"><i class="fa-solid fa-chalkboard-user"></i> ห้องครู (สำหรับผู้สอน)</button>';
+  box.innerHTML = codePanelHtml() + h;
 }
 function exportProgress(){
   if(!xlsxReady()) return;
@@ -9768,6 +9744,831 @@ function pgFinish(){
   showPraise(pg.score, pg.qs.length, 'เกมฟังพินอิน · '+PG_TYPES[pg.type].t, ()=>{ pyGo('game'); pgStart(); });
 }
 
+</script>
+<style>
+.ls-syls{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.ls-syl{display:flex;flex-direction:column;align-items:center;padding:6px 9px;border-radius:10px;border:1.5px solid var(--line);min-width:48px}
+.ls-syl b{font-size:17px;font-weight:600}
+.ls-syl small{font-size:10.5px;color:var(--mut)}
+.ls-syl.ok{border-color:var(--jade);background:color-mix(in srgb,var(--jade) 12%,transparent)}
+.ls-syl.tone{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent)}
+.ls-syl.bad{border-color:var(--seal);background:color-mix(in srgb,var(--seal) 10%,transparent)}
+.ls-big{font-size:24px;text-align:center;margin:10px 0 4px;line-height:1.35;font-weight:600}
+.ls-th{font-size:18px;text-align:center;font-weight:600;margin:10px 0 4px}
+.ls-play{display:flex;gap:12px;justify-content:center;align-items:center;margin:12px 0}
+.code-big{font-size:30px;font-weight:700;letter-spacing:.12em;text-align:center;margin:12px 0;color:var(--jade);font-variant-numeric:tabular-nums}
+.ls-skill{display:grid;grid-template-columns:150px 1fr 52px;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.ls-skill .bar{margin:0}
+.ls-steps{display:flex;flex-direction:column;gap:8px}
+.ls-step{display:flex;gap:10px;align-items:center;text-align:left;width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:inherit;font:inherit;cursor:pointer}
+.ls-step .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-weight:700;flex:none}
+.ls-step.done .n{background:var(--jade);color:#fff}
+.ls-step .pct{margin-left:auto;font-weight:700;font-size:13px}
+.tc-row{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;font:inherit;cursor:pointer}
+.tc-row:last-child{border-bottom:0}
+.tc-row .who{flex:1;min-width:0}
+.tc-num{font-weight:700;font-size:15px;text-align:right;min-width:44px}
+.tc-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tc-tbl th,.tc-tbl td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:center}
+.tc-tbl th:first-child,.tc-tbl td:first-child{text-align:left}
+</style>
+<script>
+/* ============================================================
+   14) รหัสผู้เรียน + ซิงก์ Supabase
+   1 คน 1 รหัส (เช่น ABCD-1234) ใช้ได้ทุกเครื่อง · localStorage เป็นแคช
+   ============================================================ */
+const SUPABASE_URL = 'https://ppxjxzodfpbmwlujozhn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_YpcKE1dC9CAnl0LzcXFpAg_EKkrmMH3';
+const CODE_KEY = 'hsk15_code';
+let sb = null, sbTimer = null;
+function sbClient(){
+  if(!sb && window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth:{ persistSession:false, autoRefreshToken:false } });
+  return sb;
+}
+function myCode(){ try{ return localStorage.getItem(CODE_KEY)||''; }catch(e){ return ''; } }
+function setMyCode(c){ try{ if(c) localStorage.setItem(CODE_KEY, c); else localStorage.removeItem(CODE_KEY); }catch(e){} }
+function normCode(v){ let c = String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if(c.length===8) c = c.slice(0,4)+'-'+c.slice(4); return c; }
+function hasProgress(d){ return !!(d && ((d.log&&d.log.length) || (d.daily&&Object.keys(d.daily).length) || (d.ls&&d.ls.units&&Object.keys(d.ls.units).length))); }
+function rerenderAll(){
+  S.levels = (Array.isArray(S.levels)?S.levels:[]).map(Number).filter(l=>l>=1&&l<=5); if(!S.levels.length) S.levels=[1,2,3,4,5];
+  if(!Array.isArray(S.testLog)) S.testLog=[];
+  if(!Array.isArray(S.saved)) S.saved=[];
+  applyTheme(); renderLevels(); refreshAll(); renderSaved(); renderHeroGoal(); renderWeakBanner();
+}
+function applyCloudData(d){
+  const theme = S.theme;
+  S = Object.assign(JSON.parse(S_DEFAULT), d||{});
+  if(!S.theme) S.theme = theme;
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){}
+  rerenderAll();
+}
+async function cloudInit(){
+  if(location.hash==='#teacher'){ switchTab('teacher'); }
+  if(!sbClient()) return;
+  const code = myCode();
+  if(!code){ if(location.hash!=='#teacher') setTimeout(()=>openCodeGate(), 700); return; }
+  try{
+    const { data, error } = await sb.rpc('learner_load', { p_code:code });
+    if(error) throw error;
+    if(!data){ setMyCode(''); openCodeGate('ไม่พบรหัส '+code+' ในระบบแล้ว ใส่รหัสใหม่หรือสร้างรหัสใหม่ได้เลย'); return; }
+    if(data.data && (data.data._ts||0) > (S._ts||0)) applyCloudData(data.data);
+    else cloudPush(0);
+    if(data.nick && !S.nick) S.nick = data.nick;
+  }catch(e){ console.warn('Supabase sync off:', e && e.message || e); }
+}
+async function cloudPushNow(){
+  const code = myCode(); if(!code || !sbClient()) return;
+  clearTimeout(sbTimer);
+  try{
+    const { data, error } = await sb.rpc('learner_save', { p_code:code, p_nick:S.nick||'', p_data:S, p_summary:learnerSummary() });
+    if(error) throw error;
+    if(data===false) console.warn('Supabase: ไม่พบรหัส '+code);
+  }catch(e){ console.warn('Supabase save failed:', e && e.message || e); }
+}
+function cloudPush(delay){
+  if(!myCode()) return;
+  clearTimeout(sbTimer);
+  sbTimer = setTimeout(cloudPushNow, delay==null ? 1500 : delay);
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden && myCode()) cloudPushNow(); });
+
+/* ---------- สรุปย่อสำหรับห้องครู ---------- */
+function learnerSummary(){
+  const now = Date.now(), since7 = now-7*864e5, since14 = now-14*864e5;
+  let n7 = 0, c7 = 0; const modes = {};
+  (S.log||[]).forEach(e=>{
+    if(e.t>=since7){ n7++; c7 += e.ok; }
+    if(e.t>=since14){ const m = modes[e.m] = modes[e.m] || {n:0,c:0}; m.n++; m.c += e.ok; }
+  });
+  const days14 = [];
+  for(let i=13;i>=0;i--){ const d = new Date(); d.setDate(d.getDate()-i); days14.push((S.daily[ymd(d)]||{n:0}).n); }
+  const L = lsData(), units = {};
+  LS_UNITS.forEach(u=>{ const p = lsUnitPct(u.id); if(p!=null) units[u.id] = p; });
+  const bench = {};
+  Object.keys(S.bench||{}).forEach(l=>{ const a = S.bench[l]; if(a && a.length){ const x = a[a.length-1]; bench[l] = Math.round(x.s/x.n*100); } });
+  const weak = Object.keys(S.wstat||{}).map(k=>({k:k, bad:S.wstat[k].n-S.wstat[k].c})).filter(x=>x.bad>0).sort((a,b)=>b.bad-a.bad).slice(0,8).map(x=>x.k);
+  return { nick:S.nick||'', last:S._ts||now, streak:streakDays(), today:todayN(), n7:n7, acc7:n7?Math.round(c7/n7*100):null,
+    total:(S.log||[]).length, days14:days14, modes:modes, units:units, lsTests:(L.tests||[]).slice(-10), bench:bench,
+    py:S.pyBest||{}, weak:weak, err:L.err||{} };
+}
+
+/* ---------- หน้าต่างใส่/สร้างรหัส ---------- */
+function gateEl(){
+  if(!el('code-gate')) document.body.insertAdjacentHTML('beforeend','<div class="modal hide" id="code-gate"><div class="sheet" id="code-gate-body" style="text-align:left;max-height:90vh;overflow:auto"></div></div>');
+  return el('code-gate');
+}
+function openCodeGate(msg){
+  gateEl();
+  el('code-gate-body').innerHTML = '<div style="text-align:center"><div style="font-size:40px;line-height:1">🔑</div><h2 style="font-size:18px;margin-top:6px">รหัสผู้เรียน</h2>'
+    + '<p class="small mut" style="margin-top:4px">1 คน 1 รหัส ใช้ได้ตลอด เปิดเครื่องไหนก็ใส่รหัสเดิม ความก้าวหน้าจะตามมาด้วย และผู้สอนดูพัฒนาการได้</p></div>'
+    + (msg?'<div class="note warn small" style="margin-top:10px">'+esc(msg)+'</div>':'')
+    + '<div class="panel pad" style="margin-top:12px"><div class="panel-title"><i class="fa-solid fa-right-to-bracket"></i> มีรหัสแล้ว</div>'
+    + '<input id="cg-code" placeholder="เช่น ABCD-1234" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.08em;font-weight:600" onkeydown="if(event.key===\'Enter\')codeEnter()">'
+    + '<button class="btn primary block" style="margin-top:8px" onclick="codeEnter()">เข้าใช้รหัสนี้</button></div>'
+    + '<div class="panel pad" style="margin-top:10px"><div class="panel-title"><i class="fa-solid fa-user-plus"></i> ยังไม่มีรหัส</div>'
+    + '<input id="cg-nick" placeholder="ชื่อเล่น เช่น มะลิ" maxlength="40" value="'+esc(S.nick||'')+'" onkeydown="if(event.key===\'Enter\')codeCreate()">'
+    + '<button class="btn block" style="margin-top:8px" onclick="codeCreate()">สร้างรหัสใหม่ของฉัน</button></div>'
+    + '<p class="small" id="cg-status" style="margin:8px 0;min-height:18px"></p>'
+    + '<button class="btn ghost sm block" onclick="closeCodeGate()">ข้ามไปก่อน (เก็บข้อมูลไว้ในเครื่องนี้อย่างเดียว)</button>';
+  show('code-gate', true);
+}
+function closeCodeGate(){ show('code-gate', false); const v = TABS.find(t=>el('sec-'+t) && !el('sec-'+t).classList.contains('hide')); if(v==='progress') renderProgress(); }
+function cgStatus(html){ const s = el('cg-status'); if(s) s.innerHTML = html; }
+async function codeEnter(){
+  const code = normCode(el('cg-code').value);
+  if(!/^[A-Z]{4}-\d{4}$/.test(code)) return cgStatus('<span style="color:var(--seal)">รหัสคือ ตัวอักษร 4 ตัว ขีด ตัวเลข 4 ตัว เช่น ABCD-1234</span>');
+  if(!sbClient()) return cgStatus('เชื่อมต่อระบบไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่');
+  cgStatus('กำลังตรวจรหัส…');
+  const { data, error } = await sb.rpc('learner_load', { p_code:code });
+  if(error) return cgStatus('<span style="color:var(--seal)">เชื่อมต่อไม่สำเร็จ ('+esc(error.message)+')</span>');
+  if(!data) return cgStatus('<span style="color:var(--seal)">ไม่พบรหัส '+esc(code)+' ตรวจตัวอักษรอีกครั้งนะ</span>');
+  setMyCode(code);
+  if(hasProgress(data.data)) applyCloudData(data.data);
+  else { if(data.nick) S.nick = data.nick; saveStore(); cloudPush(0); }   // รหัสใหม่ (เช่น ครูสร้างให้) → ส่งข้อมูลในเครื่องขึ้นไป
+  if(data.nick && !S.nick) S.nick = data.nick;
+  closeCodeGate(); showToast('เข้าใช้รหัส '+code+' แล้ว · '+(S.nick||''));
+}
+async function codeCreate(){
+  const nick = (el('cg-nick').value||'').trim();
+  if(!nick) return cgStatus('<span style="color:var(--seal)">ใส่ชื่อเล่นก่อนนะ ผู้สอนจะได้รู้ว่าเป็นใคร</span>');
+  if(!sbClient()) return cgStatus('เชื่อมต่อระบบไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่');
+  cgStatus('กำลังสร้างรหัส…');
+  const { data, error } = await sb.rpc('learner_create', { p_nick:nick });
+  if(error || !data) return cgStatus('<span style="color:var(--seal)">สร้างไม่สำเร็จ ('+esc(error?error.message:'ไม่ทราบสาเหตุ')+')</span>');
+  setMyCode(data); S.nick = nick; saveStore(); cloudPush(0);
+  el('code-gate-body').innerHTML = '<div style="text-align:center"><div style="font-size:40px;line-height:1">🎉</div><h2 style="font-size:18px;margin-top:6px">รหัสของ '+esc(nick)+'</h2>'
+    + '<div class="code-big">'+esc(data)+'</div>'
+    + '<p class="small">จดหรือถ่ายรูปเก็บไว้ เปิดแอปเครื่องไหนก็ใส่รหัสนี้ ความก้าวหน้าจะตามไปด้วย</p>'
+    + '<div class="grid2" style="margin-top:14px"><button class="btn" onclick="copyCode()"><i class="fa-solid fa-copy"></i> คัดลอกรหัส</button><button class="btn primary" onclick="closeCodeGate()">เริ่มฝึกเลย</button></div></div>';
+}
+function copyCode(c){
+  c = c || myCode();
+  try{ navigator.clipboard.writeText(c).then(()=>showToast('คัดลอก '+c+' แล้ว'), ()=>showToast('รหัส: '+c)); }catch(e){ showToast('รหัส: '+c); }
+}
+async function codeLogout(){
+  const c = myCode();
+  if(!confirm('ออกจากรหัส '+c+'?\nข้อมูลถูกเก็บไว้ในระบบแล้ว ใส่รหัสเดิมเมื่อไหร่ก็กลับมาได้')) return;
+  await cloudPushNow();
+  setMyCode('');
+  const theme = S.theme; S = JSON.parse(S_DEFAULT); S.theme = theme;
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){}
+  rerenderAll(); openCodeGate();
+}
+function codePanelHtml(){
+  const c = myCode();
+  if(!c) return '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-key"></i> รหัสผู้เรียน</div>'
+    + '<p class="small mut">ยังไม่มีรหัส ข้อมูลอยู่ในเครื่องนี้อย่างเดียว ผู้สอนยังมองไม่เห็นพัฒนาการ</p>'
+    + '<button class="btn primary block" style="margin-top:10px" onclick="openCodeGate()">ใส่รหัส / สร้างรหัส</button></div>';
+  return '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-key"></i> รหัสผู้เรียน</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div class="code-big" style="margin:0;font-size:22px;text-align:left">'+esc(c)+'</div>'
+    + '<div class="small mut">'+esc(S.nick||'')+' · บันทึกขึ้นระบบอัตโนมัติ</div></div>'
+    + '<button class="btn sm" onclick="copyCode()"><i class="fa-solid fa-copy"></i> คัดลอก</button></div>'
+    + '<button class="btn sm ghost" style="margin-top:8px" onclick="codeLogout()">ออกจากรหัสนี้ (ใช้เครื่องร่วมกับคนอื่น)</button></div>';
+}
+
+/* ============================================================
+   15) ห้องครู — ดูพัฒนาการผู้เรียนทุกคน
+   ============================================================ */
+let tc = { pin:'', rows:null, sel:null, q:'', loading:false, msg:'' };
+function tcAgo(t){
+  if(!t) return '—';
+  const m = Math.floor((Date.now()-new Date(t).getTime())/60000);
+  if(m<2) return 'เมื่อสักครู่'; if(m<60) return m+' นาทีก่อน';
+  const h = Math.floor(m/60); if(h<24) return h+' ชม.ก่อน';
+  const d = Math.floor(h/24); return d===1?'เมื่อวาน':d+' วันก่อน';
+}
+function tcHead(){ return '<button class="btn sm ghost" style="align-self:flex-start" onclick="'+(tc.sel?'tc.sel=null;renderTeacher()':'switchTab(\'progress\')')+'"><i class="fa-solid fa-arrow-left"></i> '+(tc.sel?'รายชื่อผู้เรียน':'กลับ')+'</button>'; }
+function renderTeacher(){
+  const b = el('tc-body'); if(!b) return;
+  if(!tc.pin){ try{ tc.pin = sessionStorage.getItem('hsk15_tpin')||''; }catch(e){} }
+  if(!tc.pin){
+    b.innerHTML = tcHead() + '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-chalkboard-user"></i> ห้องครู</div>'
+      + '<p class="small mut" style="margin-bottom:10px">ใส่รหัสครูเพื่อดูพัฒนาการของผู้เรียนทุกคน และสร้างรหัสให้ผู้เรียน</p>'
+      + '<input id="tc-pin" type="password" placeholder="รหัสครู" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')tcLogin()">'
+      + '<button class="btn primary block" style="margin-top:8px" onclick="tcLogin()">เข้าห้องครู</button>'
+      + '<p class="small" style="margin-top:8px;color:var(--seal)">'+esc(tc.msg||'')+'</p></div>';
+    return;
+  }
+  if(!tc.rows){ b.innerHTML = tcHead() + '<p class="small mut">กำลังโหลดรายชื่อ…</p>'; if(!tc.loading) tcLoad(); return; }
+  if(tc.sel) return tcDetail();
+  const q = tc.q.trim().toLowerCase();
+  const rows = tc.rows.filter(r=>!q || (r.nick||'').toLowerCase().includes(q) || r.code.toLowerCase().includes(q));
+  const act7 = tc.rows.filter(r=>Date.now()-new Date(r.updated_at).getTime() < 7*864e5).length;
+  let h = tcHead() + '<div class="panel pad"><div class="panel-title" style="justify-content:space-between"><span><i class="fa-solid fa-chalkboard-user"></i> ห้องครู</span>'
+    + '<span style="display:flex;gap:6px"><button class="btn sm" onclick="tc.rows=null;renderTeacher()"><i class="fa-solid fa-rotate"></i></button><button class="btn sm ghost" onclick="tcLogout()">ออก</button></span></div>'
+    + '<div class="stats3"><div><b>'+tc.rows.length+'</b><span>ผู้เรียนทั้งหมด</span></div><div><b>'+act7+'</b><span>ฝึกใน 7 วัน</span></div>'
+    + '<div><b>'+tc.rows.filter(r=>(r.summary||{}).today>0).length+'</b><span>ฝึกวันนี้</span></div></div></div>';
+  h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-user-plus"></i> สร้างรหัสให้ผู้เรียน</div>'
+    + '<div style="display:flex;gap:8px"><input id="tc-nick" placeholder="ชื่อเล่นผู้เรียน" maxlength="40" style="flex:1" onkeydown="if(event.key===\'Enter\')tcCreate()"><button class="btn primary" onclick="tcCreate()">สร้าง</button></div>'
+    + '<div id="tc-made" style="margin-top:8px">'+(tc.msg||'')+'</div></div>';
+  h += '<input placeholder="ค้นหาชื่อหรือรหัส…" value="'+esc(tc.q)+'" oninput="tc.q=this.value;tcListOnly()">'
+    + '<div class="panel" id="tc-list" style="padding:0">'+tcListHtml(rows)+'</div>';
+  b.innerHTML = h;
+}
+function tcListOnly(){ const q = tc.q.trim().toLowerCase(); const l = el('tc-list'); if(l) l.innerHTML = tcListHtml(tc.rows.filter(r=>!q || (r.nick||'').toLowerCase().includes(q) || r.code.toLowerCase().includes(q))); }
+function tcListHtml(rows){
+  if(!rows.length) return '<p class="small mut" style="padding:14px">ยังไม่มีผู้เรียน</p>';
+  return rows.map(r=>{
+    const s = r.summary||{}, t = (s.lsTests||[]).slice(-1)[0], t0 = (s.lsTests||[]).slice(-2)[0];
+    const diff = t && t0 && t!==t0 ? t.tot - t0.tot : null;
+    const units = Object.values(s.units||{}).filter(p=>p>=80).length;
+    return '<button class="tc-row" onclick="tc.sel=\''+r.code+'\';renderTeacher()">'
+      + '<div class="who"><b>'+esc(r.nick||'(ไม่มีชื่อ)')+'</b> <span class="small mut">'+esc(r.code)+'</span>'
+      + '<div class="small mut">ใช้ล่าสุด '+tcAgo(r.updated_at)+(s.streak?' · 🔥 '+s.streak+' วัน':'')+' · 7 วัน '+(s.n7||0)+' ข้อ'+(s.acc7!=null?' ถูก '+s.acc7+'%':'')+' · ผ่าน '+units+'/'+LS_UNITS.length+' หน่วย</div></div>'
+      + '<div class="tc-num">'+(t?t.tot+'%':'—')+'<div class="small mut" style="font-weight:400">'+(t?'ฟัง-พูด':'ยังไม่สอบ')+(diff!=null?' '+(diff>=0?'↑':'↓')+Math.abs(diff):'')+'</div></div></button>';
+  }).join('');
+}
+async function tcLoad(){
+  if(!sbClient()){ el('tc-body').innerHTML = tcHead()+'<p class="small">เชื่อมต่อระบบไม่ได้</p>'; return; }
+  tc.loading = true;
+  const { data, error } = await sb.rpc('teacher_list', { p_pin:tc.pin });
+  tc.loading = false;
+  if(error){
+    tc.pin = ''; tc.rows = null; tc.msg = /รหัสครู/.test(error.message) ? 'รหัสครูไม่ถูกต้อง' : 'เชื่อมต่อไม่สำเร็จ: '+error.message;
+    try{ sessionStorage.removeItem('hsk15_tpin'); }catch(e){}
+  } else { tc.rows = data || []; tc.msg = ''; }
+  renderTeacher();
+}
+function tcLogin(){ tc.pin = (el('tc-pin').value||'').trim(); if(!tc.pin) return; try{ sessionStorage.setItem('hsk15_tpin', tc.pin); }catch(e){} tc.rows = null; tc.msg=''; renderTeacher(); }
+function tcLogout(){ tc.pin=''; tc.rows=null; tc.sel=null; tc.msg=''; try{ sessionStorage.removeItem('hsk15_tpin'); }catch(e){} renderTeacher(); }
+async function tcCreate(){
+  const nick = (el('tc-nick').value||'').trim(); if(!nick) return;
+  const { data, error } = await sb.rpc('teacher_create', { p_pin:tc.pin, p_nick:nick });
+  tc.msg = error ? '<span style="color:var(--seal)">สร้างไม่สำเร็จ: '+esc(error.message)+'</span>'
+    : '<div class="note good small">รหัสของ <b>'+esc(nick)+'</b>: <b style="font-size:18px;letter-spacing:.08em">'+esc(data)+'</b> <button class="btn sm" onclick="copyCode(\''+esc(data)+'\')">คัดลอก</button></div>';
+  tc.rows = null; tc.loading = true;
+  const r = await sb.rpc('teacher_list', { p_pin:tc.pin }); tc.loading = false;
+  tc.rows = r.data || []; renderTeacher();
+}
+async function tcDelete(code){
+  if(!confirm('ลบรหัส '+code+' และข้อมูลทั้งหมดของผู้เรียนคนนี้? ย้อนกลับไม่ได้')) return;
+  const { error } = await sb.rpc('teacher_delete', { p_pin:tc.pin, p_code:code });
+  if(error) return alert('ลบไม่สำเร็จ: '+error.message);
+  tc.sel = null; tc.rows = null; renderTeacher();
+}
+function skillBars(t){
+  return LS_SKILLS.map(k=>{ const v = t[k.k];
+    return '<div class="ls-skill"><span>'+k.k+' · '+k.t+'</span><div class="bar"><i style="width:'+(v==null?0:v)+'%"></i></div><b style="text-align:right">'+(v==null?'—':v+'%')+'</b></div>'; }).join('');
+}
+function tcDetail(){
+  const r = tc.rows.find(x=>x.code===tc.sel); if(!r){ tc.sel=null; return renderTeacher(); }
+  const s = r.summary||{}, tests = s.lsTests||[], last = tests[tests.length-1];
+  const g = Math.max(1, ...(s.days14||[0]));
+  let h = tcHead() + '<div class="panel pad"><h2 style="font-size:18px">'+esc(r.nick||'(ไม่มีชื่อ)')+'</h2>'
+    + '<p class="small mut">รหัส <b>'+esc(r.code)+'</b> · สร้างเมื่อ '+new Date(r.created_at).toLocaleDateString('th-TH')+' · ใช้ล่าสุด '+tcAgo(r.updated_at)+'</p>'
+    + '<div class="stats3" style="margin-top:10px"><div><b>'+(s.streak||0)+'</b><span>ฝึกต่อเนื่อง (วัน)</span></div><div><b>'+(s.n7||0)+'</b><span>ข้อใน 7 วัน</span></div><div><b>'+(s.acc7!=null?s.acc7+'%':'—')+'</b><span>ตอบถูก 7 วัน</span></div></div>'
+    + '<div class="dbars" style="margin-top:12px">'+(s.days14||[]).map(n=>'<div class="dbar"><div class="col"><i style="height:'+Math.max(n?8:2, n/g*100)+'%"></i></div><span>'+n+'</span></div>').join('')+'</div>'
+    + '<p class="sub" style="text-align:center">จำนวนข้อที่ฝึก 14 วันล่าสุด</p></div>';
+  h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-ear-listen"></i> แบบทดสอบฟัง-พูด</div>';
+  if(last){
+    h += '<p class="small mut">ครั้งล่าสุด '+new Date(last.t).toLocaleDateString('th-TH')+' · รวม <b>'+last.tot+'%</b></p>'+skillBars(last);
+    if(tests.length>1){
+      h += '<div style="overflow-x:auto;margin-top:10px"><table class="tc-tbl"><tr><th>วันที่</th>'+LS_SKILLS.map(k=>'<th>'+k.k+'</th>').join('')+'<th>รวม</th></tr>'
+        + tests.slice().reverse().map(t=>'<tr><td>'+new Date(t.t).toLocaleDateString('th-TH',{day:'numeric',month:'short'})+'</td>'+LS_SKILLS.map(k=>'<td>'+(t[k.k]==null?'—':t[k.k])+'</td>').join('')+'<td><b>'+t.tot+'</b></td></tr>').join('')+'</table></div>';
+    }
+    h += '<div class="note small" style="margin-top:10px">'+lsAdvice(last)+'</div>';
+  } else h += '<p class="small mut">ยังไม่เคยทำแบบทดสอบ</p>';
+  h += '</div>';
+  h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-route"></i> บทเรียนฟัง-พูด</div>'
+    + LS_UNITS.map(u=>{ const p = (s.units||{})[u.id]; return '<div class="ls-skill"><span>'+u.e+' '+u.t+'</span><div class="bar"><i style="width:'+(p||0)+'%"></i></div><b style="text-align:right">'+(p==null?'—':p+'%')+(p>=80?' ✓':'')+'</b></div>'; }).join('')
+    + (s.err && (s.err.tone||s.err.sound) ? '<p class="small" style="margin-top:8px">ตอนพูด: วรรณยุกต์เพี้ยน <b>'+(s.err.tone||0)+'</b> พยางค์ · พยัญชนะ/สระคลาด <b>'+(s.err.sound||0)+'</b> พยางค์</p>' : '')
+    + '</div>';
+  const mk = Object.keys(s.modes||{}).sort((a,b)=>s.modes[b].n-s.modes[a].n);
+  h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-table-list"></i> ผลฝึกแต่ละโหมด 14 วัน</div>'
+    + (mk.length ? mk.map(m=>{ const x = s.modes[m], p = Math.round(x.c/x.n*100);
+        return '<div class="ls-skill"><span>'+(MODE_TH[m]||m)+'</span><div class="bar"><i style="width:'+p+'%"></i></div><b style="text-align:right">'+p+'%</b></div><p class="sub" style="margin:-4px 0 4px 158px">'+x.n+' ข้อ</p>'; }).join('') : '<p class="small mut">ยังไม่มีข้อมูล</p>')
+    + '</div>';
+  const pyb = Object.keys(s.py||{});
+  const bl = Object.keys(s.bench||{});
+  if(pyb.length || bl.length){
+    h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-trophy"></i> สถิติอื่น ๆ</div>'
+      + (pyb.length?'<p class="small"><b>เกมฟังพินอิน (ดีที่สุด):</b> '+pyb.map(k=>(PG_TYPES[k]?PG_TYPES[k].t:k)+' '+s.py[k]+'%').join(' · ')+'</p>':'')
+      + (bl.length?'<p class="small" style="margin-top:6px"><b>ชุดมาตรฐาน HSK (ล่าสุด):</b> '+bl.map(l=>'HSK '+l+' '+s.bench[l]+'%').join(' · ')+'</p>':'')
+      + '</div>';
+  }
+  if((s.weak||[]).length) h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-triangle-exclamation"></i> คำที่พลาดบ่อย</div><div class="chips">'
+    + s.weak.map(w=>'<span class="chip zh">'+esc(w)+'</span>').join('')+'</div></div>';
+  h += '<button class="btn sm ghost" style="color:var(--seal);align-self:center" onclick="tcDelete(\''+r.code+'\')"><i class="fa-solid fa-trash"></i> ลบผู้เรียนคนนี้</button>';
+  el('tc-body').innerHTML = h;
+}
+
+/* ============================================================
+   16) ฟัง-พูด 听说 — ไม่ต้องอ่านตัวจีนได้
+   หน่วยละ 5 ขั้น: ฟังเข้าใจ → ฟังสะกด → พูดตาม → พูดเอง → ตอบโต้
+   รายการ: [อักษรจีน (ใช้สร้างเสียง), พินอิน, คำแปลไทย]
+   ============================================================ */
+const LS_UNITS = [
+  { id:'u1', e:'👋', t:'ทักทาย แนะนำตัว', d:'สวัสดี ขอบคุณ ขอโทษ ชื่ออะไร มาจากไหน',
+    items:[ ['你好','nǐ hǎo','สวัสดี'], ['您好','nín hǎo','สวัสดี (สุภาพ)'], ['谢谢','xièxie','ขอบคุณ'], ['不客气','bú kèqi','ไม่เป็นไร (ตอบคำขอบคุณ)'],
+      ['对不起','duìbuqǐ','ขอโทษ'], ['没关系','méi guānxi','ไม่เป็นไร (ตอบคำขอโทษ)'], ['再见','zàijiàn','ลาก่อน'], ['你好吗？','nǐ hǎo ma?','สบายดีไหม'],
+      ['我很好','wǒ hěn hǎo','ฉันสบายดี'], ['你叫什么名字？','nǐ jiào shénme míngzi?','คุณชื่ออะไร'], ['我叫小美','wǒ jiào Xiǎoměi','ฉันชื่อเสี่ยวเหม่ย'],
+      ['我是泰国人','wǒ shì Tàiguó rén','ฉันเป็นคนไทย'], ['你是哪国人？','nǐ shì nǎ guó rén?','คุณเป็นคนชาติอะไร'], ['认识你很高兴','rènshi nǐ hěn gāoxìng','ยินดีที่ได้รู้จัก'] ],
+    qa:[ { q:'你叫什么名字？', qpy:'nǐ jiào shénme míngzi?', qth:'คุณชื่ออะไร', a:'我叫小美', apy:'wǒ jiào Xiǎoměi', ath:'ฉันชื่อ… (บอกชื่อตัวเอง)', ok:['我叫','叫','我是'] },
+         { q:'你是哪国人？', qpy:'nǐ shì nǎ guó rén?', qth:'คุณเป็นคนชาติอะไร', a:'我是泰国人', apy:'wǒ shì Tàiguó rén', ath:'ฉันเป็นคนไทย', ok:['泰国','国人'] },
+         { q:'你好吗？', qpy:'nǐ hǎo ma?', qth:'สบายดีไหม', a:'我很好', apy:'wǒ hěn hǎo', ath:'ฉันสบายดี', ok:['很好','好','不错'] },
+         { q:'谢谢你！', qpy:'xièxie nǐ!', qth:'ขอบคุณนะ', a:'不客气', apy:'bú kèqi', ath:'ไม่เป็นไร', ok:['不客气','不用谢','没事'] },
+         { q:'对不起！', qpy:'duìbuqǐ!', qth:'ขอโทษนะ', a:'没关系', apy:'méi guānxi', ath:'ไม่เป็นไร', ok:['没关系','没事'] } ] },
+  { id:'u2', e:'🆘', t:'ประโยคช่วยชีวิต', d:'ฟังไม่ทัน ขอให้พูดซ้ำ พูดช้าลง ถามความหมาย',
+    items:[ ['请再说一遍','qǐng zài shuō yí biàn','ช่วยพูดอีกครั้ง'], ['请说慢一点','qǐng shuō màn yìdiǎn','ช่วยพูดช้าลงหน่อย'], ['我听不懂','wǒ tīng bu dǒng','ฉันฟังไม่เข้าใจ'],
+      ['我听懂了','wǒ tīngdǒng le','ฉันฟังเข้าใจแล้ว'], ['我不知道','wǒ bù zhīdào','ฉันไม่รู้'], ['这是什么意思？','zhè shì shénme yìsi?','นี่หมายความว่าอะไร'],
+      ['这个用中文怎么说？','zhège yòng Zhōngwén zěnme shuō?','อันนี้ภาษาจีนพูดว่าอย่างไร'], ['我会说一点儿中文','wǒ huì shuō yìdiǎnr Zhōngwén','ฉันพูดจีนได้นิดหน่อย'],
+      ['你会说英语吗？','nǐ huì shuō Yīngyǔ ma?','คุณพูดภาษาอังกฤษได้ไหม'], ['可以','kěyǐ','ได้ (อนุญาต)'], ['不可以','bù kěyǐ','ไม่ได้'],
+      ['对','duì','ใช่ / ถูก'], ['不对','bú duì','ไม่ใช่ / ไม่ถูก'], ['请帮我一下','qǐng bāng wǒ yíxià','ช่วยฉันหน่อย'], ['等一下','děng yíxià','รอสักครู่'] ],
+    qa:[ { sit:'อีกฝ่ายพูดเร็วมาก ฟังไม่ทัน อยากให้พูดช้าลง', a:'请说慢一点', apy:'qǐng shuō màn yìdiǎn', ath:'ช่วยพูดช้าลงหน่อย', ok:['慢'] },
+         { sit:'ฟังไม่ทัน อยากให้อีกฝ่ายพูดซ้ำอีกรอบ', a:'请再说一遍', apy:'qǐng zài shuō yí biàn', ath:'ช่วยพูดอีกครั้ง', ok:['再说','一遍','再'] },
+         { q:'你听懂了吗？', qpy:'nǐ tīngdǒng le ma?', qth:'ฟังเข้าใจไหม', a:'我听懂了', apy:'wǒ tīngdǒng le', ath:'เข้าใจแล้ว (หรือ 我听不懂 ไม่เข้าใจ)', ok:['听懂','听不懂','懂'] },
+         { q:'你会说中文吗？', qpy:'nǐ huì shuō Zhōngwén ma?', qth:'คุณพูดภาษาจีนได้ไหม', a:'我会说一点儿中文', apy:'wǒ huì shuō yìdiǎnr Zhōngwén', ath:'ฉันพูดจีนได้นิดหน่อย', ok:['会说','一点','会'] },
+         { sit:'เห็นของบางอย่าง อยากถามว่าภาษาจีนเรียกว่าอะไร', a:'这个用中文怎么说？', apy:'zhège yòng Zhōngwén zěnme shuō?', ath:'อันนี้ภาษาจีนพูดว่าอย่างไร', ok:['怎么说'] } ] },
+  { id:'u3', e:'🔢', t:'ตัวเลข อายุ เบอร์โทร', d:'นับเลข ถามอายุ บอกเบอร์โทร',
+    items:[ ['十','shí','สิบ'], ['四十四','sìshísì','สี่สิบสี่'], ['二十','èrshí','ยี่สิบ'], ['九十九','jiǔshíjiǔ','เก้าสิบเก้า'], ['一百','yìbǎi','หนึ่งร้อย'],
+      ['两个','liǎng ge','สองอัน / สองคน'], ['几个？','jǐ ge?','กี่อัน'], ['你几岁？','nǐ jǐ suì?','หนูอายุกี่ขวบ (ถามเด็ก)'], ['你多大？','nǐ duō dà?','คุณอายุเท่าไหร่'],
+      ['我八岁','wǒ bā suì','ฉันอายุ 8 ขวบ'], ['我二十五岁','wǒ èrshíwǔ suì','ฉันอายุ 25 ปี'], ['你的电话号码是多少？','nǐ de diànhuà hàomǎ shì duōshao?','เบอร์โทรของคุณคือเบอร์อะไร'],
+      ['零八九','líng bā jiǔ','ศูนย์ แปด เก้า'], ['七','qī','เจ็ด'] ],
+    qa:[ { q:'你多大？', qpy:'nǐ duō dà?', qth:'คุณอายุเท่าไหร่', a:'我二十五岁', apy:'wǒ èrshíwǔ suì', ath:'ฉันอายุ … ปี (บอกอายุตัวเอง)', ok:['岁'] },
+         { q:'一加一是几？', qpy:'yī jiā yī shì jǐ?', qth:'หนึ่งบวกหนึ่งได้เท่าไหร่', a:'二', apy:'èr', ath:'สอง', ok:['二','两'] },
+         { q:'三加四是几？', qpy:'sān jiā sì shì jǐ?', qth:'สามบวกสี่ได้เท่าไหร่', a:'七', apy:'qī', ath:'เจ็ด', ok:['七'] },
+         { q:'你有几个朋友？', qpy:'nǐ yǒu jǐ ge péngyou?', qth:'คุณมีเพื่อนกี่คน', a:'我有十个朋友', apy:'wǒ yǒu shí ge péngyou', ath:'ฉันมีเพื่อน … คน', ok:['个','有'] } ] },
+  { id:'u4', e:'🛒', t:'ซื้อของ ต่อราคา', d:'ถามราคา ต่อราคา เลือกของ จ่ายเงิน',
+    items:[ ['多少钱？','duōshao qián?','เท่าไหร่'], ['太贵了','tài guì le','แพงเกินไป'], ['便宜一点儿吧','piányi yìdiǎnr ba','ลดหน่อยนะ'], ['我要这个','wǒ yào zhège','ฉันเอาอันนี้'],
+      ['我不要','wǒ bú yào','ฉันไม่เอา'], ['有没有大的？','yǒu méiyǒu dà de?','มีไซซ์ใหญ่ไหม'], ['我看看','wǒ kànkan','ขอดูก่อนนะ'], ['一共多少钱？','yígòng duōshao qián?','ทั้งหมดเท่าไหร่'],
+      ['可以扫码吗？','kěyǐ sǎo mǎ ma?','สแกนจ่ายได้ไหม'], ['可以刷卡吗？','kěyǐ shuā kǎ ma?','รูดบัตรได้ไหม'], ['十块钱','shí kuài qián','สิบหยวน'],
+      ['我想买水果','wǒ xiǎng mǎi shuǐguǒ','ฉันอยากซื้อผลไม้'], ['好的，我买了','hǎo de, wǒ mǎi le','โอเค ซื้อเลย'] ],
+    qa:[ { q:'你要什么？', qpy:'nǐ yào shénme?', qth:'คุณต้องการอะไร', a:'我要这个', apy:'wǒ yào zhège', ath:'ฉันเอาอันนี้', ok:['我要','这个','要'] },
+         { q:'这个一百块。', qpy:'zhège yìbǎi kuài.', qth:'อันนี้ร้อยหยวน', a:'太贵了，便宜一点儿吧', apy:'tài guì le, piányi yìdiǎnr ba', ath:'แพงไป ลดหน่อยนะ', ok:['贵','便宜'] },
+         { sit:'อยากรู้ว่าของชิ้นนี้ราคาเท่าไหร่', a:'多少钱？', apy:'duōshao qián?', ath:'เท่าไหร่', ok:['多少钱','多少'] },
+         { q:'还要别的吗？', qpy:'hái yào bié de ma?', qth:'ต้องการอย่างอื่นอีกไหม', a:'不要了，谢谢', apy:'bú yào le, xièxie', ath:'ไม่แล้ว ขอบคุณ', ok:['不要','要','够了','谢谢'] } ] },
+  { id:'u5', e:'🍜', t:'กินดื่ม สั่งอาหาร', d:'หิว สั่งเครื่องดื่ม ไม่เผ็ด เช็กบิล',
+    items:[ ['我饿了','wǒ è le','ฉันหิวแล้ว'], ['我渴了','wǒ kě le','ฉันหิวน้ำ'], ['我要一杯咖啡','wǒ yào yì bēi kāfēi','ขอกาแฟหนึ่งแก้ว'], ['我要一瓶水','wǒ yào yì píng shuǐ','ขอน้ำหนึ่งขวด'],
+      ['不要辣','bú yào là','ไม่เอาเผ็ด'], ['少放糖','shǎo fàng táng','ใส่น้ำตาลน้อย'], ['请给我菜单','qǐng gěi wǒ càidān','ขอเมนูหน่อย'], ['很好吃','hěn hǎochī','อร่อยมาก'],
+      ['买单','mǎidān','เช็กบิล'], ['打包','dǎbāo','ห่อกลับบ้าน'], ['我吃饱了','wǒ chī bǎo le','ฉันอิ่มแล้ว'], ['我不吃肉','wǒ bù chī ròu','ฉันไม่กินเนื้อสัตว์'], ['米饭','mǐfàn','ข้าวสวย'] ],
+    qa:[ { q:'你想喝什么？', qpy:'nǐ xiǎng hē shénme?', qth:'อยากดื่มอะไร', a:'我要一杯咖啡', apy:'wǒ yào yì bēi kāfēi', ath:'ขอกาแฟหนึ่งแก้ว', ok:['咖啡','水','茶','要','喝'] },
+         { q:'要辣的吗？', qpy:'yào là de ma?', qth:'เอาเผ็ดไหม', a:'不要辣', apy:'bú yào là', ath:'ไม่เอาเผ็ด (หรือ 要 เอา)', ok:['不要','要','辣'] },
+         { q:'好吃吗？', qpy:'hǎochī ma?', qth:'อร่อยไหม', a:'很好吃', apy:'hěn hǎochī', ath:'อร่อยมาก', ok:['好吃'] },
+         { sit:'กินเสร็จแล้ว อยากเรียกพนักงานมาเก็บเงิน', a:'买单', apy:'mǎidān', ath:'เช็กบิล', ok:['买单','结账'] } ] },
+  { id:'u6', e:'🕒', t:'เวลา วัน นัดหมาย', d:'กี่โมง วันอะไร ว่างเมื่อไหร่',
+    items:[ ['现在几点？','xiànzài jǐ diǎn?','ตอนนี้กี่โมง'], ['三点','sān diǎn','สามโมง'], ['三点半','sān diǎn bàn','สามโมงครึ่ง'], ['今天','jīntiān','วันนี้'],
+      ['明天','míngtiān','พรุ่งนี้'], ['昨天','zuótiān','เมื่อวาน'], ['今天星期几？','jīntiān xīngqī jǐ?','วันนี้วันอะไร'], ['星期一','xīngqīyī','วันจันทร์'],
+      ['星期天','xīngqītiān','วันอาทิตย์'], ['早上','zǎoshang','ตอนเช้า'], ['晚上','wǎnshang','ตอนเย็น / กลางคืน'], ['明天见','míngtiān jiàn','พรุ่งนี้เจอกัน'],
+      ['你什么时候有空？','nǐ shénme shíhou yǒu kòng?','คุณว่างเมื่อไหร่'], ['我明天有空','wǒ míngtiān yǒu kòng','พรุ่งนี้ฉันว่าง'] ],
+    qa:[ { q:'现在几点？', qpy:'xiànzài jǐ diǎn?', qth:'ตอนนี้กี่โมง', a:'三点', apy:'sān diǎn', ath:'… โมง (บอกเวลาจริง)', ok:['点'] },
+         { q:'今天星期几？', qpy:'jīntiān xīngqī jǐ?', qth:'วันนี้วันอะไร', a:'今天星期一', apy:'jīntiān xīngqīyī', ath:'วันนี้วัน… (บอกวันจริง)', ok:['星期','礼拜','周'] },
+         { q:'你什么时候有空？', qpy:'nǐ shénme shíhou yǒu kòng?', qth:'คุณว่างเมื่อไหร่', a:'我明天有空', apy:'wǒ míngtiān yǒu kòng', ath:'พรุ่งนี้ฉันว่าง', ok:['有空','明天','今天','晚上','星期'] },
+         { sit:'จะแยกกับเพื่อน และนัดเจอกันพรุ่งนี้', a:'明天见', apy:'míngtiān jiàn', ath:'พรุ่งนี้เจอกัน', ok:['明天见','明天'] } ] },
+  { id:'u7', e:'🗺️', t:'ถามทาง เดินทาง', d:'อยู่ที่ไหน ไปยังไง ซ้าย ขวา ตรงไป',
+    items:[ ['厕所在哪儿？','cèsuǒ zài nǎr?','ห้องน้ำอยู่ที่ไหน'], ['地铁站在哪儿？','dìtiězhàn zài nǎr?','สถานีรถไฟใต้ดินอยู่ที่ไหน'], ['怎么走？','zěnme zǒu?','ไปยังไง'],
+      ['一直走','yìzhí zǒu','ตรงไป'], ['往左拐','wǎng zuǒ guǎi','เลี้ยวซ้าย'], ['往右拐','wǎng yòu guǎi','เลี้ยวขวา'], ['在前面','zài qiánmiàn','อยู่ข้างหน้า'],
+      ['远吗？','yuǎn ma?','ไกลไหม'], ['很近','hěn jìn','ใกล้มาก'], ['我迷路了','wǒ mílù le','ฉันหลงทาง'], ['我要去机场','wǒ yào qù jīchǎng','ฉันจะไปสนามบิน'],
+      ['请停在这里','qǐng tíng zài zhèlǐ','ช่วยจอดตรงนี้'] ],
+    qa:[ { q:'你去哪儿？', qpy:'nǐ qù nǎr?', qth:'คุณจะไปไหน', a:'我要去机场', apy:'wǒ yào qù jīchǎng', ath:'ฉันจะไปสนามบิน', ok:['去','我要'] },
+         { sit:'อยากเข้าห้องน้ำ แต่หาไม่เจอ', a:'厕所在哪儿？', apy:'cèsuǒ zài nǎr?', ath:'ห้องน้ำอยู่ที่ไหน', ok:['厕所','洗手间','卫生间'] },
+         { sit:'นั่งแท็กซี่ถึงที่หมายแล้ว บอกคนขับให้จอด', a:'请停在这里', apy:'qǐng tíng zài zhèlǐ', ath:'ช่วยจอดตรงนี้', ok:['停'] },
+         { q:'远吗？', qpy:'yuǎn ma?', qth:'ไกลไหม', a:'很近', apy:'hěn jìn', ath:'ใกล้มาก (หรือ 很远 ไกลมาก)', ok:['远','近'] } ] },
+  { id:'u8', e:'💬', t:'ความรู้สึก ความต้องการ', d:'ชอบ อยาก เหนื่อย ดีใจ ไม่สบาย',
+    items:[ ['我喜欢中国菜','wǒ xǐhuan Zhōngguó cài','ฉันชอบอาหารจีน'], ['我不喜欢','wǒ bù xǐhuan','ฉันไม่ชอบ'], ['我想去','wǒ xiǎng qù','ฉันอยากไป'],
+      ['我累了','wǒ lèi le','ฉันเหนื่อยแล้ว'], ['我很高兴','wǒ hěn gāoxìng','ฉันดีใจมาก'], ['我有点儿忙','wǒ yǒudiǎnr máng','ฉันยุ่งนิดหน่อย'], ['没问题','méi wèntí','ไม่มีปัญหา'],
+      ['太好了','tài hǎo le','ดีมากเลย'], ['我不舒服','wǒ bù shūfu','ฉันไม่สบาย'], ['我头疼','wǒ tóu téng','ฉันปวดหัว'], ['加油','jiāyóu','สู้ ๆ'],
+      ['真的吗？','zhēn de ma?','จริงเหรอ'], ['好的','hǎo de','ได้เลย / โอเค'] ],
+    qa:[ { q:'你喜欢中国菜吗？', qpy:'nǐ xǐhuan Zhōngguó cài ma?', qth:'คุณชอบอาหารจีนไหม', a:'我喜欢中国菜', apy:'wǒ xǐhuan Zhōngguó cài', ath:'ฉันชอบอาหารจีน', ok:['喜欢'] },
+         { q:'你累吗？', qpy:'nǐ lèi ma?', qth:'เหนื่อยไหม', a:'我累了', apy:'wǒ lèi le', ath:'ฉันเหนื่อยแล้ว (หรือ 不累 ไม่เหนื่อย)', ok:['累'] },
+         { q:'我们一起去吧！', qpy:'wǒmen yìqǐ qù ba!', qth:'ไปด้วยกันเถอะ', a:'好的，没问题', apy:'hǎo de, méi wèntí', ath:'ได้เลย ไม่มีปัญหา', ok:['好','没问题','可以','行'] },
+         { sit:'เพื่อนกำลังจะสอบ อยากให้กำลังใจ', a:'加油', apy:'jiāyóu', ath:'สู้ ๆ', ok:['加油'] } ] }
+];
+const LS_PASS = 0.8;            // ผ่านเมื่อพยางค์ถูก 80% ขึ้นไป
+const LS_STEPS = [
+  { k:'hear',   t:'ฟังเข้าใจ', d:'ฟังเสียง แล้วเลือกความหมาย', i:'fa-ear-listen' },
+  { k:'spell',  t:'ฟังสะกด',   d:'ฟังเสียง แล้วเลือกพินอินที่ถูก', i:'fa-spell-check' },
+  { k:'shadow', t:'พูดตาม',    d:'ฟังต้นแบบ แล้วพูดตามให้ชัด', i:'fa-repeat' },
+  { k:'say',    t:'พูดเอง',    d:'เห็นภาษาไทย แล้วพูดเป็นภาษาจีน', i:'fa-comment-dots' },
+  { k:'reply',  t:'ตอบโต้',    d:'ฟังคำถามหรือสถานการณ์ แล้วพูดตอบ', i:'fa-comments' }
+];
+const LS_SKILLS = [
+  { k:'A', t:'หูวรรณยุกต์' }, { k:'B', t:'หูพยัญชนะ/สระ' }, { k:'C', t:'ฟังเข้าใจ' }, { k:'D', t:'อ่านพินอินออกเสียง' }, { k:'E', t:'พูดสื่อสาร' }
+];
+function lsData(){
+  S.ls = S.ls || {};
+  S.ls.units = S.ls.units || {}; S.ls.tests = S.ls.tests || []; S.ls.err = S.ls.err || { tone:0, sound:0 };
+  return S.ls;
+}
+function lsUnitPct(id){
+  const u = lsData().units[id]; if(!u || !u.steps) return null;
+  return Math.round(LS_STEPS.reduce((a,s)=>a+(u.steps[s.k]||0),0)/LS_STEPS.length);
+}
+function lsSay(hz, slow){ speakZh(hz, slow ? 0.6 : 0.85); }
+
+/* ---------- พินอิน: แยกพยางค์ · เทียบเสียงที่ไมค์ได้ยิน ---------- */
+const LS_PYMAP = {};
+let LS_MAP_READY = false;
+function lsHz(h){ return String(h||'').replace(/[^一-鿿]/g,''); }
+function lsSeg(s){
+  const memo = {};
+  const go = i=>{
+    if(i===s.length) return [];
+    if(memo[i]!==undefined) return memo[i];
+    let res = null;
+    for(let L=Math.min(6, s.length-i); L>=1 && !res; L--){
+      const p = s.slice(i, i+L);
+      if(PY_IDX[p] || (p==='r' && i>0)){ const rest = go(i+L); if(rest) res = [p].concat(rest); }
+    }
+    return memo[i] = res;
+  };
+  return go(0);
+}
+function lsSylls(py){            // 'nǐ hǎo' → [[base, tone, ตัวสะกดเดิม, ลำดับคำ], …]
+  const out = [];
+  String(py).replace(/[^A-Za-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜüÜ\s]/g,' ').split(/\s+/).filter(Boolean).forEach((w,wi)=>{
+    let base = ''; const marks = [];
+    for(const c of w.toLowerCase()){ if(PY_MARK_REV[c]){ marks.push([base.length, PY_MARK_REV[c][1]]); base += PY_MARK_REV[c][0]; } else base += c; }
+    const seg = lsSeg(base);
+    if(!seg){ out.push([base, marks.length?marks[0][1]:0, w, wi]); return; }
+    let pos = 0;
+    seg.forEach(s=>{
+      const m = marks.find(x=>x[0]>=pos && x[0]<pos+s.length);
+      out.push(s==='r' ? ['er',0,'r',wi] : [s, m?m[1]:0, w.slice(pos,pos+s.length), wi]);
+      pos += s.length;
+    });
+  });
+  return out;
+}
+function lsJoin(ss){ let o = '', w = -1; ss.forEach(s=>{ o += (w>=0 && s[3]!==w ? ' ' : '') + s[2]; w = s[3]; }); return o.toLowerCase(); }
+function lsMapAdd(hz, py){ const cs = [...lsHz(hz)], ss = lsSylls(py); if(cs.length!==ss.length) return; cs.forEach((c,i)=>{ if(!LS_PYMAP[c]) LS_PYMAP[c] = [ss[i][0], ss[i][1]]; }); }
+function lsMapInit(){
+  if(LS_MAP_READY) return; LS_MAP_READY = true;
+  LS_UNITS.forEach(u=>{ u.items.forEach(x=>lsMapAdd(x[0], x[1])); u.qa.forEach(q=>{ if(q.q) lsMapAdd(q.q, q.qpy); lsMapAdd(q.a, q.apy); }); });
+  try{ BASE_VOCAB.forEach(v=>lsMapAdd(v.hanzi, v.pinyin)); }catch(e){}
+  Object.keys(PY_CH).forEach(c=>{ if(!LS_PYMAP[c]) LS_PYMAP[c] = PY_CH[c]; });
+}
+function lsDigits(s){            // ไมค์บางเครื่องส่งตัวเลขอารบิกมา → แปลงเป็นตัวจีน
+  const D = '零一二三四五六七八九', U = ['','十','百','千'];
+  return String(s||'').replace(/\d+/g, d=>{
+    if((d.length>1 && d[0]==='0') || d.length>4) return [...d].map(x=>D[x]).join('');
+    const n = +d; if(n===0) return '零';
+    let out = '', zero = false; const ds = [...String(n)];
+    ds.forEach((x,i)=>{ const p = ds.length-1-i; if(x==='0'){ zero = true; return; } if(zero){ out += '零'; zero = false; } out += D[x]+U[p]; });
+    return out.indexOf('一十')===0 ? out.slice(1) : out;
+  });
+}
+function lsScore(target, heard){   // เทียบทีละพยางค์ · คำพ้องเสียงนับว่าถูก (ระบบฟังได้ตัวอักษรต่างแต่เสียงเดียวกัน)
+  lsMapInit();
+  const T = [...lsHz(target)], H = [...lsHz(lsDigits(heard))], n = T.length, m = H.length;
+  const cmp = (a,b)=>{ if(a===b) return 'ok'; const pa = LS_PYMAP[a], pb = LS_PYMAP[b]; if(!pa || !pb || pa[0]!==pb[0]) return 'bad'; return (pa[1]===pb[1] || !pa[1] || !pb[1]) ? 'ok' : 'tone'; };
+  const val = s=>s==='ok'?2:s==='tone'?1:-1;
+  const dp = Array.from({length:n+1}, ()=>new Array(m+1).fill(0));
+  for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--){ const v = val(cmp(T[i],H[j])); dp[i][j] = Math.max(dp[i+1][j], dp[i][j+1], v>0 ? v+dp[i+1][j+1] : -1e9); }
+  const marks = []; let i = 0, j = 0;
+  while(i<n){
+    if(j<m){
+      const s = cmp(T[i],H[j]), v = val(s);
+      if(v>0 && dp[i][j]===v+dp[i+1][j+1]){ marks.push({ st:s, h:H[j] }); i++; j++; continue; }
+      if(dp[i][j]===dp[i][j+1]){ j++; continue; }
+    }
+    marks.push({ st:'bad', h:'' }); i++;
+  }
+  const pts = marks.reduce((a,x)=>a+(x.st==='ok'?1:x.st==='tone'?0.5:0), 0);
+  return { ratio: n ? pts/n : 0, marks:marks };
+}
+function lsMarksHtml(target, py, res){
+  const ss = lsSylls(py), n = [...lsHz(target)].length;
+  return '<div class="ls-syls">'+res.marks.map((m,i)=>{
+    const s = ss.length===n ? ss[i][2] : [...lsHz(target)][i];
+    const hp = m.h && LS_PYMAP[m.h] ? toneMark(LS_PYMAP[m.h][0], LS_PYMAP[m.h][1]) : '';
+    const lab = m.st==='ok' ? '✓' : m.st==='tone' ? 'วรรณยุกต์เพี้ยน'+(hp?' ('+hp+')':'') : (hp ? 'ได้ยิน '+hp : 'ไม่ได้ยิน');
+    return '<span class="ls-syl '+m.st+'"><b>'+esc(s)+'</b><small>'+esc(lab)+'</small></span>';
+  }).join('')+'</div>';
+}
+function lsCountErr(res){ const L = lsData(); res.marks.forEach(m=>{ if(m.st==='tone') L.err.tone++; else if(m.st==='bad') L.err.sound++; }); }
+
+/* ---------- สร้างตัวหลอกพินอิน (เปลี่ยนวรรณยุกต์ / พยัญชนะ / สระที่คนไทยสับสน) ---------- */
+const LS_CI = [['zh','z','j'],['ch','c','q'],['sh','s','x'],['b','p'],['d','t'],['g','k'],['n','l'],['f','h'],['r','l']];
+const LS_CF = [['an','ang'],['en','eng'],['in','ing'],['ian','iang'],['uan','uang'],['u','ü'],['ou','uo'],['ai','ei'],['ao','ou']];
+function lsMutate(py){
+  const ss = lsSylls(py); if(!ss.length) return [];
+  const right = lsJoin(ss), out = new Set(); let guard = 0;
+  while(out.size<3 && guard++<80){
+    const k = Math.floor(Math.random()*ss.length), s = ss[k], row = PY_IDX[s[0]];
+    let nb = s[0], nt = s[1]; const r = Math.random();
+    if(r<0.45 || !row){ nt = rnd([1,2,3,4].filter(t=>t!==s[1])); }
+    else if(r<LS_PASS){ const g = LS_CI.find(g=>g.includes(row[1])); if(!g) continue; const nr = PY_BYPOS[rnd(g.filter(x=>x!==row[1]))+'|'+row[2]]; if(!nr) continue; nb = nr[0]; }
+    else { const g = LS_CF.find(g=>g.includes(row[2])); if(!g) continue; const nr = PY_BYPOS[row[1]+'|'+rnd(g.filter(x=>x!==row[2]))]; if(!nr) continue; nb = nr[0]; }
+    if(nb===s[0] && nt===s[1]) continue;
+    const alt = lsJoin(ss.map((x,i)=> i===k ? [nb, nt, toneMark(nb, nt), x[3]] : x));
+    if(alt!==right) out.add(alt);
+  }
+  return [...out];
+}
+
+/* ---------- หน้าหลักฟัง-พูด ---------- */
+let ls = { view:'home', u:null, step:null, chain:false, qs:[], i:0, pts:0, ans:null, cur:null, test:null };
+function lsGo(v){ stopSpeaking(); micStop(); ls.view = v; renderLS(); try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){} }
+function renderLS(){
+  const b = el('ls-body'); if(!b) return;
+  if(ls.view==='unit') return lsUnitPage();
+  if(ls.view==='play') return lsPlay();
+  if(ls.view==='test') return lsTestPlay();
+  const L = lsData(), last = L.tests[L.tests.length-1], prev = L.tests[L.tests.length-2];
+  const next = LS_UNITS.find(u=>(lsUnitPct(u.id)||0)<80) || LS_UNITS[0];
+  let h = '<div class="hero"><h2>ฟัง-พูด 听说</h2><p>อ่านตัวจีนไม่ออกก็ฝึกได้ ทุกบทมีแค่เสียง พินอิน และคำแปลไทย ฟังให้เข้าใจก่อน แล้วค่อยพูดให้ชัด</p>'
+    + '<button class="btn block" style="margin-top:12px;background:var(--heroInk);color:var(--heroBg);border:0" onclick="lsOpenUnit(\''+next.id+'\')">'
+    + '<i class="fa-solid fa-play"></i> เรียนต่อ: '+next.e+' '+esc(next.t)+'</button></div>';
+  if(!micSupported()) h += '<div class="note warn small">เบราว์เซอร์นี้ใช้ไมค์ตรวจเสียงไม่ได้ ขั้นที่ต้องพูดจะให้ฟังต้นแบบแล้วประเมินตัวเอง ถ้าอยากให้ระบบตรวจ ให้เปิดด้วย Chrome (Android/คอม) หรือ Safari (iPhone)</div>';
+  h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-chart-simple"></i> แบบทดสอบฟัง-พูดมาตรฐาน</div>'
+    + '<p class="small mut" style="margin-bottom:8px">ข้อสอบชุดเดิมทุกครั้ง 45 ข้อ ประมาณ 15 นาที แยกคะแนน 5 ด้าน ทำทุก 2 สัปดาห์เพื่อดูว่าเก่งขึ้นตรงไหน</p>'
+    + (last ? '<p class="small">ครั้งล่าสุด '+new Date(last.t).toLocaleDateString('th-TH')+' · รวม <b>'+last.tot+'%</b>'+(prev?' ('+(last.tot-prev.tot>=0?'+':'')+(last.tot-prev.tot)+' จากครั้งก่อน)':'')+'</p>'+skillBars(last)
+             + '<div class="note small" style="margin-top:8px">'+lsAdvice(last)+'</div>' : '')
+    + '<button class="btn primary block" style="margin-top:10px" onclick="lsTestStart()"><i class="fa-solid fa-clipboard-check"></i> '+(last?'ทำแบบทดสอบอีกครั้ง':'เริ่มแบบทดสอบครั้งแรก')+'</button></div>';
+  h += '<div class="panel-title" style="margin-top:4px"><i class="fa-solid fa-route"></i> บทเรียน 8 หน่วย (หน่วยละ ~10 นาที)</div><div class="menu">'
+    + LS_UNITS.map((u,i)=>{ const p = lsUnitPct(u.id);
+      return '<button class="mcard" onclick="lsOpenUnit(\''+u.id+'\')"><span class="ico" style="background:var(--soft);font-size:22px">'+u.e+'</span>'
+        + '<h3>'+(i+1)+' · '+esc(u.t)+'</h3><p>'+esc(u.d)+'</p>'
+        + (p!=null?'<span class="tag" style="align-self:flex-start">'+(p>=80?'✓ ผ่าน ':'')+p+'%</span>':'')+'</button>'; }).join('')+'</div>';
+  h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-lightbulb"></i> วิธีฝึกให้ได้ผล</div><ul class="small" style="margin:0;padding-left:18px;line-height:1.75">'
+    + '<li><b>หูก่อนปาก:</b> ฟังจนแยกเสียงได้ก่อน แล้วค่อยพูด ถ้ายังแยกไม่ออก ให้ไปเล่นเกมฟังแยกเสียงในเมนูพินอิน</li>'
+    + '<li><b>ฟังช้า แล้วฟังปกติ:</b> กด 🐢 ฟังทีละพยางค์ แล้วฟังความเร็วปกติให้ได้จังหวะ</li>'
+    + '<li><b>พูดดัง ๆ ทุกครั้ง:</b> พูดในใจไม่นับ ปากต้องชินกับท่าทาง</li>'
+    + '<li><b>ดูกรอบสีหลังพูด:</b> เขียว = ชัด · เหลือง = พยางค์ถูกแต่วรรณยุกต์เพี้ยน · แดง = พยัญชนะหรือสระคลาด</li>'
+    + '<li><b>วันละ 1 หน่วย:</b> ได้ 80% ขึ้นไปค่อยไปหน่วยถัดไป และกลับมาทวนหน่วยเก่าบ้าง</li></ul></div>';
+  h += '<div class="grid2"><button class="btn" onclick="switchTab(\'pinyin\')"><i class="fa-solid fa-language"></i> พื้นฐานพินอิน</button>'
+    + '<button class="btn" onclick="switchTab(\'speak\')"><i class="fa-solid fa-microphone"></i> ฝึกพูดคำศัพท์ HSK</button></div>';
+  b.innerHTML = h;
+}
+function lsOpenUnit(id){ ls.u = LS_UNITS.find(u=>u.id===id); lsGo('unit'); }
+function lsUnitPage(){
+  const u = ls.u, st = (lsData().units[u.id]||{}).steps || {}, p = lsUnitPct(u.id);
+  let h = '<button class="btn sm ghost" style="align-self:flex-start" onclick="lsGo(\'home\')"><i class="fa-solid fa-arrow-left"></i> ฟัง-พูด</button>'
+    + '<div class="panel pad"><div style="display:flex;gap:11px;align-items:center"><span style="font-size:32px">'+u.e+'</span><div><h2 style="font-size:17px">'+esc(u.t)+'</h2>'
+    + '<p class="small mut">'+esc(u.d)+' · '+u.items.length+' คำ/วลี</p></div></div>'
+    + (p!=null?'<div class="bar" style="margin-top:12px"><i style="width:'+p+'%"></i></div><p class="sub">คะแนนหน่วยนี้ '+p+'% '+(p>=80?'✓ ผ่านแล้ว':'(ผ่านที่ 80%)')+'</p>':'')
+    + '<button class="btn primary block" style="margin-top:12px" onclick="lsStart(0,true)"><i class="fa-solid fa-play"></i> เรียนทั้งหน่วย (5 ขั้นต่อกัน)</button></div>';
+  h += '<div class="ls-steps">'+LS_STEPS.map((s,i)=>'<button class="ls-step'+(st[s.k]>=80?' done':'')+'" onclick="lsStart('+i+',false)"><span class="n">'+(st[s.k]>=80?'✓':i+1)+'</span>'
+    + '<span><b>'+s.t+'</b><span class="small mut" style="display:block">'+s.d+'</span></span><span class="pct">'+(st[s.k]!=null?st[s.k]+'%':'')+'</span></button>').join('')+'</div>';
+  h += '<div class="panel pad"><div class="panel-title"><i class="fa-solid fa-list"></i> คำและวลีในหน่วยนี้ (แตะเพื่อฟัง)</div><div class="list" style="margin:0 -14px">'
+    + u.items.map((x,i)=>'<div style="display:flex;gap:10px;align-items:center"><button class="btn sm icon" onclick="lsSay(ls.u.items['+i+'][0])"><i class="fa-solid fa-volume-high"></i></button>'
+      + '<button class="btn sm icon" onclick="lsSay(ls.u.items['+i+'][0],true)" aria-label="ฟังช้า">🐢</button>'
+      + '<div style="min-width:0"><span class="py" style="font-size:16px">'+esc(x[1])+'</span><div class="small mut">'+esc(x[2])+'</div></div></div>').join('')+'</div></div>';
+  el('ls-body').innerHTML = h;
+}
+
+/* ---------- สร้างโจทย์แต่ละขั้น ---------- */
+function lsMakeQs(u, k){
+  const items = shuf(u.items), multi = items.filter(x=>[...lsHz(x[0])].length>=2);
+  if(k==='hear') return items.slice(0,8).map(x=>{
+    const others = shuf(u.items.filter(y=>y[2]!==x[2])).slice(0,3).map(y=>y[2]);
+    return { x:x, opts:shuf([x[2]].concat(others)).map(t=>({ label:t, ok:t===x[2] })) };
+  });
+  if(k==='spell') return items.slice(0,8).map(x=>{
+    const right = lsJoin(lsSylls(x[1]));
+    let alts = lsMutate(x[1]);
+    shuf(u.items).forEach(y=>{ const p = lsJoin(lsSylls(y[1])); if(alts.length<3 && p!==right && !alts.includes(p)) alts.push(p); });
+    return { x:x, opts:shuf([right].concat(alts.slice(0,3))).map(t=>({ label:t, ok:t===right })) };
+  });
+  if(k==='shadow' || k==='say') return (multi.length>=6 ? multi : items).slice(0,6).map(x=>({ x:x }));
+  return shuf(u.qa).map(q=>({ q:q }));
+}
+function lsStart(stepIdx, chain){
+  ls.step = stepIdx; ls.chain = chain; ls.qs = lsMakeQs(ls.u, LS_STEPS[stepIdx].k);
+  ls.i = 0; ls.pts = 0; ls.ans = null; ls.cur = null; ls.results = chain && stepIdx===0 ? {} : (ls.results||{});
+  lsGo('play');
+}
+
+/* ---------- เล่นแต่ละขั้น ---------- */
+function lsPlayBtns(hz){
+  return '<div class="ls-play"><button class="mic sm" style="background:var(--jade);box-shadow:none" onclick="lsSay(\''+pyQ(hz)+'\')" aria-label="ฟังอีกครั้ง"><i class="fa-solid fa-volume-high"></i></button>'
+    + '<button class="btn sm" onclick="lsSay(\''+pyQ(hz)+'\',true)">🐢 ฟังช้า</button></div>';
+}
+function lsMicBlock(){
+  if(!micSupported()) return '<div class="grid2" style="margin-top:12px"><button class="btn" onclick="lsSelf(0.3)">ยังไม่คล่อง</button><button class="btn primary" onclick="lsSelf(1)">พูดได้ชัดแล้ว ✓</button></div>'
+    + '<p class="sub" style="text-align:center;margin-top:6px">เครื่องนี้ตรวจเสียงไม่ได้ ฟังต้นแบบ พูดตามดัง ๆ แล้วประเมินตัวเอง</p>';
+  return '<button class="mic" id="ls-mic" onclick="lsMic()" style="margin:14px auto 4px;display:grid" aria-label="เริ่มพูด"><i class="fa-solid fa-microphone"></i></button>'
+    + '<p class="sub" id="ls-mic-status" style="text-align:center">แตะไมค์ แล้วพูดได้เลย</p><div id="ls-mic-res"></div>';
+}
+function lsPlay(){
+  const s = LS_STEPS[ls.step], q = ls.qs[ls.i], u = ls.u;
+  if(!q) return lsStepDone();
+  let h = '<button class="btn sm ghost" style="align-self:flex-start" onclick="lsGo(\'unit\')"><i class="fa-solid fa-arrow-left"></i> '+u.e+' '+esc(u.t)+'</button>'
+    + '<div class="panel pad"><div class="meta"><span><i class="fa-solid '+s.i+'"></i> ขั้น '+(ls.step+1)+' · '+s.t+'</span><span>ข้อ '+(ls.i+1)+' / '+ls.qs.length+'</span></div>'
+    + '<div class="bar" style="margin:8px 0 12px"><i style="width:'+(ls.i/ls.qs.length*100)+'%"></i></div>';
+  const done = ls.ans!=null;
+  if(s.k==='hear' || s.k==='spell'){
+    h += '<p style="text-align:center">'+(s.k==='hear'?'ฟังแล้วเลือกความหมาย':'ฟังแล้วเลือกพินอินที่ตรงกับเสียง')+'</p>' + lsPlayBtns(q.x[0])
+      + '<div class="opts one" style="margin-top:6px">'+q.opts.map((o,i)=>{
+        let c = 'opt'; if(done){ c += o.ok ? ' correct' : i===ls.ans ? ' wrong' : ' dim'; }
+        return '<button class="'+c+'" onclick="lsAnswer('+i+')" '+(done?'disabled':'')+'><span class="'+(s.k==='spell'?'py':'')+'" style="font-size:'+(s.k==='spell'?19:16)+'px">'+esc(o.label)+'</span></button>'; }).join('')+'</div>';
+    if(done) h += '<div class="note '+(q.opts[ls.ans].ok?'good':'warn')+'" style="margin-top:12px;text-align:center"><span class="py" style="font-size:19px">'+esc(q.x[1])+'</span><div>'+esc(q.x[2])+'</div></div>';
+  } else if(s.k==='shadow'){
+    h += '<p style="text-align:center">ฟังต้นแบบ แล้วพูดตามให้เหมือนที่สุด</p><div class="ls-big py">'+esc(q.x[1])+'</div><p class="small mut" style="text-align:center">'+esc(q.x[2])+'</p>'
+      + lsPlayBtns(q.x[0]) + lsMicBlock();
+  } else if(s.k==='say'){
+    const hint = ls.cur && ls.cur.hint;
+    h += '<p style="text-align:center">พูดประโยคนี้เป็นภาษาจีน</p><div class="ls-th">'+esc(q.x[2])+'</div>'
+      + (hint||done ? '<div class="ls-big py">'+esc(q.x[1])+'</div>'+lsPlayBtns(q.x[0])
+                    : '<div style="text-align:center;margin:8px 0"><button class="btn sm" onclick="lsHint()"><i class="fa-solid fa-eye"></i> ขอใบ้ (ดูพินอิน + ฟัง · ได้คะแนนครึ่งเดียว)</button></div>')
+      + lsMicBlock();
+  } else {
+    const qq = q.q, hint = ls.cur && ls.cur.hint;
+    if(qq.sit) h += '<p style="text-align:center">สถานการณ์</p><div class="ls-th">'+esc(qq.sit)+'</div><p class="small mut" style="text-align:center">จะพูดภาษาจีนว่าอะไร</p>';
+    else h += '<p style="text-align:center">ฟังคำถาม แล้วพูดตอบเป็นภาษาจีน</p>' + lsPlayBtns(qq.q)
+      + (ls.cur && ls.cur.showQ ? '<div class="ls-big py" style="font-size:19px">'+esc(qq.qpy)+'</div><p class="small mut" style="text-align:center">'+esc(qq.qth)+'</p>'
+                                : '<div style="text-align:center"><button class="btn sm ghost" onclick="lsShowQ()">ดูพินอินคำถาม</button></div>');
+    h += hint||done ? '<div class="note" style="margin-top:8px;text-align:center"><span class="sub">ตัวอย่างคำตอบ</span><div class="py" style="font-size:18px">'+esc(qq.apy)+'</div><div class="small">'+esc(qq.ath)+'</div>'
+                       + '<button class="btn sm" style="margin-top:6px" onclick="lsSay(\''+pyQ(qq.a)+'\')"><i class="fa-solid fa-volume-high"></i> ฟังตัวอย่าง</button></div>'
+                    : '<div style="text-align:center;margin-top:8px"><button class="btn sm" onclick="lsHint()"><i class="fa-solid fa-eye"></i> ดูตัวอย่างคำตอบ (ได้คะแนนครึ่งเดียว)</button></div>';
+    h += lsMicBlock();
+  }
+  h += '<div class="grid2" style="margin-top:12px">'
+    + (s.k==='hear'||s.k==='spell' ? '<span></span>' : '<button class="btn" onclick="lsNext()">'+(ls.cur && ls.cur.best>0 ? 'ข้อถัดไป' : 'ข้ามข้อนี้')+'</button>')
+    + (done ? '<button class="btn ink" onclick="lsNext()">'+(ls.i+1<ls.qs.length?'ข้อถัดไป':'ดูผล')+' <i class="fa-solid fa-arrow-right"></i></button>' : '<span></span>')
+    + '</div></div>';
+  el('ls-body').innerHTML = h;
+  if(ls.cur && ls.cur.resHtml){ const r = el('ls-mic-res'); if(r) r.innerHTML = ls.cur.resHtml; }
+  if(!q.played){ q.played = true; qStart(); if(s.k==='hear' || s.k==='spell' || s.k==='shadow') lsSay(q.x[0]); else if(s.k==='reply' && q.q.q) lsSay(q.q.q); }
+}
+function lsCur(){ if(!ls.cur) ls.cur = { best:0, tries:0, hint:false, showQ:false, resHtml:'' }; return ls.cur; }
+function lsAnswer(i){
+  if(ls.ans!=null) return;
+  const q = ls.qs[ls.i], ok = !!q.opts[i].ok; ls.ans = i;
+  ls.pts += ok ? 1 : 0;
+  logAttempt('ls', ls.u.id+':'+LS_STEPS[ls.step].k, ok, {track:false});
+  lsPlay();
+  if(!ok) setTimeout(()=>lsSay(q.x[0]), 300);
+}
+function lsHint(){ const c = lsCur(); c.hint = true; lsPlay(); const q = ls.qs[ls.i]; lsSay(q.x ? q.x[0] : q.q.a); }
+function lsShowQ(){ lsCur().showQ = true; lsPlay(); }
+function lsSelf(v){ const c = lsCur(); c.best = Math.max(c.best, v*(c.hint?0.5:1)); c.tries++; lsNext(); }
+function lsMic(){
+  const s = LS_STEPS[ls.step], q = ls.qs[ls.i], c = lsCur();
+  const target = q.x ? q.x[0] : q.q.a, py = q.x ? q.x[1] : q.q.apy;
+  const b = el('ls-mic'); if(b) b.classList.add('live');
+  micListen(target, (okRaw, heard)=>{
+    const bb = el('ls-mic'); if(bb) bb.classList.remove('live');
+    c.tries++;
+    let ratio, html;
+    if(s.k==='reply'){
+      const hh = lsHz(lsDigits(heard));
+      const hit = q.q.ok.some(k=>hh.indexOf(k)>=0);
+      const sc = lsScore(target, heard);
+      ratio = hit ? 1 : Math.max(sc.ratio>=0.6 ? sc.ratio : 0, 0);
+      html = '<div class="note '+(ratio>=LS_PASS?'good':'warn')+'" style="text-align:center">ระบบได้ยิน: <b class="zh">'+esc(heard||'—')+'</b>'
+        + '<div class="small" style="margin-top:4px">'+(ratio>=LS_PASS?'✓ ตอบได้ตรงคำถาม เยี่ยมมาก!':'ยังไม่ตรงคำถาม ลองดูตัวอย่างคำตอบแล้วพูดอีกครั้ง')+'</div></div>';
+    } else {
+      const sc = lsScore(target, heard); ratio = sc.ratio; lsCountErr(sc);
+      html = lsMarksHtml(target, py, sc)
+        + '<p class="small" style="text-align:center;margin-top:8px">'+(ratio>=LS_PASS?'<b style="color:var(--jade)">✓ ชัดเจนดีมาก!</b>':ratio>=0.4?'ใกล้แล้ว ดูพยางค์สีเหลือง/แดง ฟังต้นแบบช้า ๆ แล้วลองใหม่':'ระบบยังจับเสียงไม่ได้ ฟังต้นแบบอีกครั้ง แล้วพูดช้า ๆ ชัด ๆ')+'</p>';
+    }
+    const got = ratio*(c.hint?0.5:1);
+    if(got>c.best) c.best = got;
+    logAttempt('ls', ls.u.id+':'+s.k, ratio>=LS_PASS, {track:false});
+    c.resHtml = html;
+    lsPlay();
+    if(ratio>=LS_PASS && !c.hint) setTimeout(()=>{ if(ls.view==='play' && ls.qs[ls.i]===q) lsNext(); }, 1600);
+  }, 'ls-mic-status');
+}
+function lsNext(){
+  micStop();
+  const s = LS_STEPS[ls.step];
+  if(s.k!=='hear' && s.k!=='spell'){ const c = ls.cur; ls.pts += c ? (c.best>=LS_PASS ? 1 : c.best) : 0; }
+  ls.i++; ls.ans = null; ls.cur = null; lsPlay();
+}
+function lsStepDone(){
+  const s = LS_STEPS[ls.step], pct = Math.round(ls.pts/Math.max(1,ls.qs.length)*100);
+  const L = lsData(), U = L.units[ls.u.id] = L.units[ls.u.id] || { steps:{} };
+  U.steps[s.k] = Math.max(U.steps[s.k]||0, pct); U.last = Date.now();
+  ls.results[s.k] = pct;
+  saveStore();
+  if(ls.chain && ls.step+1<LS_STEPS.length){
+    showToast('ขั้น '+s.t+' ได้ '+pct+'% · ไปขั้นต่อไป');
+    return lsStart(ls.step+1, true);
+  }
+  const keys = Object.keys(ls.results);
+  let h = '<div class="panel pad" style="text-align:center"><div style="font-size:40px">'+(pct>=80?'🏆':pct>=50?'🎉':'🌱')+'</div>'
+    + '<h3>'+(ls.chain?'จบหน่วย '+esc(ls.u.t)+' แล้ว!':'จบขั้น '+s.t+' แล้ว!')+'</h3>';
+  if(ls.chain) h += '<div style="text-align:left;margin-top:10px">'+LS_STEPS.map(x=>'<div class="ls-skill"><span>'+x.t+'</span><div class="bar"><i style="width:'+(ls.results[x.k]||0)+'%"></i></div><b style="text-align:right">'+(ls.results[x.k]!=null?ls.results[x.k]+'%':'—')+'</b></div>').join('')+'</div>';
+  else h += '<p class="sub">ได้ '+pct+'%</p>';
+  const up = lsUnitPct(ls.u.id);
+  h += '<p class="small" style="margin-top:8px">คะแนนรวมหน่วยนี้ (ดีที่สุดของแต่ละขั้น): <b>'+up+'%</b> '+(up>=80?'✓ ผ่านแล้ว ไปหน่วยถัดไปได้เลย':'· ผ่านที่ 80% ฝึกขั้นที่คะแนนน้อยซ้ำได้')+'</p>'
+    + '<div class="grid2" style="margin-top:12px"><button class="btn" onclick="lsGo(\'unit\')">กลับไปหน่วยนี้</button>';
+  const ni = LS_UNITS.indexOf(ls.u)+1;
+  h += (up>=80 && LS_UNITS[ni] ? '<button class="btn primary" onclick="lsOpenUnit(\''+LS_UNITS[ni].id+'\')">หน่วยถัดไป '+LS_UNITS[ni].e+'</button>'
+                               : '<button class="btn primary" onclick="lsStart('+ls.step+','+(ls.chain?'true':'false')+')">'+(ls.chain?'เรียนทั้งหน่วยอีกรอบ':'ฝึกขั้นนี้อีกรอบ')+'</button>') + '</div></div>';
+  el('ls-body').innerHTML = h;
+  const tot = ls.chain ? Math.round(keys.reduce((a,k)=>a+ls.results[k],0)/Math.max(1,keys.length)) : pct;
+  showPraise(Math.round(tot/10), 10, 'ฟัง-พูด · '+ls.u.t, ()=>lsStart(ls.chain?0:ls.step, ls.chain));
+}
+
+/* ============================================================
+   17) แบบทดสอบฟัง-พูดมาตรฐาน (ข้อสอบชุดเดิมทุกครั้ง)
+   A หูวรรณยุกต์ · B หูพยัญชนะ/สระ · C ฟังเข้าใจ · D อ่านพินอินออกเสียง · E พูดสื่อสาร
+   ============================================================ */
+const LS_TEST_DEF = {
+  A: [['ma',3],['mai',4],['shu',1],['ren',2],['hao',3],['qu',4],['tang',2],['mi',3],['bai',2],['gou',3]],
+  B: [[1,'zi',['zhi','zi','ji']],[4,'shi',['shi','si','xi']],[1,'qi',['chi','ci','qi']],[2,'lan',['lan','nan']],[4,'pao',['bao','pao']],
+      [1,'tang',['tan','tang']],[2,'qing',['qin','qing']],[3,'nü',['nu','nü']],[4,'ke',['ge','ke']],[1,'feng',['fen','feng']]],
+  C: ['谢谢','我听不懂','你几岁？','太贵了','多少钱？','不要辣','明天见','往左拐','厕所在哪儿？','我累了'],
+  D: ['你好吗？','对不起','请说慢一点','多少钱？','我要一杯咖啡','现在几点？','一直走','我很高兴','没问题','认识你很高兴'],
+  E: ['谢谢','我听不懂','多少钱？','厕所在哪儿？','明天见']
+};
+function lsFind(hz){ for(const u of LS_UNITS){ const x = u.items.find(y=>y[0]===hz); if(x) return x; } return null; }
+function lsTestBuild(){
+  const qs = [];
+  LS_TEST_DEF.A.forEach(([b,t])=>{ const hz = pyChar(b,t); if(!hz) return;
+    qs.push({ sec:'A', kind:'pick', hz:hz, prompt:'ฟังแล้วเลือกวรรณยุกต์', opts:[1,2,3,4].filter(x=>pyChar(b,x)).map(x=>({ label:toneMark(b,x), ok:x===t })) }); });
+  LS_TEST_DEF.B.forEach(([t,tg,bs])=>{ const hz = pyChar(tg,t); if(!hz) return;
+    const o = bs.filter(x=>pyChar(x,t)); if(o.length<2) return;
+    qs.push({ sec:'B', kind:'pick', hz:hz, prompt:'ฟังแล้วเลือกพินอินที่ได้ยิน', opts:o.map(x=>({ label:toneMark(x,t), ok:x===tg })) }); });
+  const flat = []; LS_UNITS.forEach(u=>u.items.forEach(x=>flat.push(x)));
+  LS_TEST_DEF.C.forEach(hz=>{ const x = lsFind(hz); if(!x) return;
+    const i = flat.indexOf(x), d = [1,5,9].map(k=>flat[(i+k)%flat.length][2]);
+    qs.push({ sec:'C', kind:'pick', hz:hz, prompt:'ฟังแล้วเลือกความหมาย', opts:[x[2]].concat(d).sort().map(t=>({ label:t, ok:t===x[2] })) }); });
+  LS_TEST_DEF.D.forEach(hz=>{ const x = lsFind(hz); if(x) qs.push({ sec:'D', kind:'speak', x:x, prompt:'อ่านพินอินนี้ออกเสียง (ไม่มีเสียงตัวอย่าง)' }); });
+  LS_TEST_DEF.E.forEach(hz=>{ const x = lsFind(hz); if(x) qs.push({ sec:'E', kind:'speak', x:x, prompt:'พูดเป็นภาษาจีน' }); });
+  return qs;
+}
+function lsTestStart(){
+  ls.test = { qs:lsTestBuild(), i:0, sc:{}, n:{}, ans:null, cur:null, mic:micSupported() };
+  lsGo('test');
+}
+function lsTestPlay(){
+  const T = ls.test, q = T.qs[T.i];
+  if(!q) return lsTestDone();
+  if(q.kind==='speak' && !T.mic){ T.i++; return lsTestPlay(); }
+  const sk = LS_SKILLS.find(k=>k.k===q.sec), secQs = T.qs.filter(x=>x.sec===q.sec), si = secQs.indexOf(q);
+  let h = '<button class="btn sm ghost" style="align-self:flex-start" onclick="if(confirm(\'ออกจากแบบทดสอบ? ผลจะไม่ถูกบันทึก\'))lsGo(\'home\')"><i class="fa-solid fa-xmark"></i> ออก</button>'
+    + '<div class="panel pad"><div class="meta"><span>ส่วน '+q.sec+' · '+sk.t+'</span><span>ข้อ '+(si+1)+' / '+secQs.length+'</span></div>'
+    + '<div class="bar" style="margin:8px 0 12px"><i style="width:'+(T.i/T.qs.length*100)+'%"></i></div>'
+    + '<p style="text-align:center">'+q.prompt+'</p>';
+  if(q.kind==='pick'){
+    h += lsPlayBtns(q.hz) + '<div class="opts'+(q.opts.length===4&&q.sec!=='C'?'':' one')+'" style="margin-top:6px">'+q.opts.map((o,i)=>{
+      let c = 'opt'; if(T.ans!=null) c += i===T.ans ? (o.ok?' correct':' wrong') : ' dim';
+      return '<button class="'+c+'" onclick="lsTestAnswer('+i+')" '+(T.ans!=null?'disabled':'')+'><span class="'+(q.sec==='C'?'':'py')+'" style="font-size:'+(q.sec==='C'?16:20)+'px">'+esc(o.label)+'</span></button>'; }).join('')+'</div>';
+  } else {
+    h += q.sec==='D' ? '<div class="ls-big py">'+esc(q.x[1])+'</div>' : '<div class="ls-th">'+esc(q.x[2])+'</div>';
+    h += '<button class="mic" id="ls-mic" onclick="lsTestMic()" style="margin:14px auto 4px;display:grid"><i class="fa-solid fa-microphone"></i></button>'
+      + '<p class="sub" id="ls-mic-status" style="text-align:center">แตะไมค์ แล้วพูด (พูดได้ 2 ครั้ง นับครั้งที่ดีกว่า)</p>'
+      + '<div id="ls-mic-res">'+(T.cur&&T.cur.resHtml||'')+'</div>'
+      + '<button class="btn ink block" style="margin-top:12px" onclick="lsTestNext()">'+(T.cur&&T.cur.tries?'ข้อถัดไป':'ข้ามข้อนี้')+' <i class="fa-solid fa-arrow-right"></i></button>';
+  }
+  h += '</div>';
+  el('ls-body').innerHTML = h;
+  if(q.kind==='pick' && !q.played){ q.played = true; lsSay(q.hz); }
+}
+function lsTestAnswer(i){
+  const T = ls.test, q = T.qs[T.i]; if(T.ans!=null) return;
+  T.ans = i; const ok = !!q.opts[i].ok;
+  T.sc[q.sec] = (T.sc[q.sec]||0) + (ok?1:0); T.n[q.sec] = (T.n[q.sec]||0) + 1;
+  logAttempt('lstest', q.sec, ok, {track:false});
+  lsTestPlay();
+  setTimeout(()=>{ if(ls.view==='test' && ls.test===T && T.qs[T.i]===q){ T.i++; T.ans = null; lsTestPlay(); } }, 650);
+}
+function lsTestMic(){
+  const T = ls.test, q = T.qs[T.i], c = T.cur = T.cur || { best:0, tries:0, resHtml:'' };
+  if(c.tries>=2) return;
+  const b = el('ls-mic'); if(b) b.classList.add('live');
+  micListen(q.x[0], (okRaw, heard)=>{
+    c.tries++;
+    const sc = lsScore(q.x[0], heard); lsCountErr(sc);
+    c.best = Math.max(c.best, sc.ratio);
+    c.resHtml = lsMarksHtml(q.x[0], q.x[1], sc) + (c.tries<2 ? '<p class="sub" style="text-align:center;margin-top:6px">พูดได้อีก 1 ครั้ง หรือกดข้อถัดไป</p>' : '');
+    logAttempt('lstest', q.sec, sc.ratio>=LS_PASS, {track:false});
+    lsTestPlay();
+  }, 'ls-mic-status');
+}
+function lsTestNext(){
+  micStop();
+  const T = ls.test, q = T.qs[T.i], c = T.cur;
+  const v = c ? (c.best>=LS_PASS ? 1 : c.best) : 0;
+  T.sc[q.sec] = (T.sc[q.sec]||0) + v; T.n[q.sec] = (T.n[q.sec]||0) + 1;
+  T.i++; T.cur = null; lsTestPlay();
+}
+function lsTestDone(){
+  const T = ls.test; if(T.done) return; T.done = true;
+  const r = { t:Date.now() };
+  LS_SKILLS.forEach(k=>{ r[k.k] = T.n[k.k] ? Math.round(T.sc[k.k]/T.n[k.k]*100) : null; });
+  const vals = LS_SKILLS.map(k=>r[k.k]).filter(v=>v!=null);
+  r.tot = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+  const L = lsData(), prev = L.tests[L.tests.length-1];
+  L.tests.push(r); if(L.tests.length>30) L.tests.splice(0, L.tests.length-30);
+  saveStore(); cloudPush(0);
+  let h = '<div class="panel pad"><div style="text-align:center"><div style="font-size:40px">📊</div><h3>ผลแบบทดสอบฟัง-พูด</h3>'
+    + '<div style="font-size:34px;font-weight:700;color:var(--jade)">'+r.tot+'%</div>'
+    + (prev?'<p class="sub">'+(r.tot-prev.tot>=0?'เพิ่มขึ้น +':'ลดลง ')+(r.tot-prev.tot)+' จากครั้งก่อน ('+prev.tot+'%)</p>':'<p class="sub">ครั้งแรก ทำอีกครั้งใน 2 สัปดาห์เพื่อเทียบพัฒนาการ</p>')+'</div>'
+    + '<div style="margin-top:12px">'+skillBars(r)+'</div>'
+    + (prev?'<p class="sub" style="margin-top:4px">ครั้งก่อน: '+LS_SKILLS.map(k=>k.k+' '+(prev[k.k]==null?'—':prev[k.k])).join(' · ')+'</p>':'')
+    + (!T.mic?'<div class="note warn small" style="margin-top:10px">เครื่องนี้ใช้ไมค์ไม่ได้ ส่วน D และ E จึงไม่มีคะแนน</div>':'')
+    + '<div class="note small" style="margin-top:10px">'+lsAdvice(r)+'</div>'
+    + '<button class="btn primary block" style="margin-top:12px" onclick="lsGo(\'home\')">กลับหน้าฟัง-พูด</button></div>';
+  el('ls-body').innerHTML = h;
+}
+function lsAdvice(r){
+  const tips = {
+    A:'<b>ฝึกหูวรรณยุกต์:</b> เมนูพินอิน → 1 วรรณยุกต์ (ฟังเทียบ 4 เสียง) แล้วเล่นเกม "ทายวรรณยุกต์" วันละ 10 ข้อ',
+    B:'<b>ฝึกแยกพยัญชนะ/สระ:</b> เมนูพินอิน → 6 คู่เสียงที่มักสับสน แล้วเล่นเกม "ทายพยัญชนะ" และ "ทายสระ"',
+    C:'<b>ฝึกฟังเข้าใจ:</b> ทำขั้น "ฟังเข้าใจ" ของแต่ละหน่วยซ้ำ ฟังโดยไม่ดูพินอินก่อน แล้วค่อยเช็ก',
+    D:'<b>ฝึกออกเสียง:</b> ทำขั้น "พูดตาม" กด 🐢 ฟังช้า แล้วพูดตามทีละพยางค์ ดูกรอบสีเหลือง/แดงว่าพลาดตรงไหน',
+    E:'<b>ฝึกพูดเอง:</b> ทำขั้น "พูดเอง" และ "ตอบโต้" พยายามไม่กดใบ้ ถ้านึกไม่ออกให้กลับไปฟังรายการคำในหน่วยก่อน'
+  };
+  const ks = LS_SKILLS.filter(k=>r[k.k]!=null).sort((a,b)=>r[a.k]-r[b.k]);
+  if(!ks.length) return 'ยังไม่มีข้อมูลพอให้คำแนะนำ';
+  if(r[ks[0].k]>=85) return '🎉 ทุกด้านแข็งแรงมาก ลองฟังบทสนทนาในเมนู "สนทนา" ด้วยความเร็วปกติ และสวมบทบาทพูดเองทั้งบท';
+  return 'ด้านที่ควรเน้นตอนนี้: <b>'+ks[0].k+' · '+ks[0].t+'</b> ('+r[ks[0].k]+'%)<br>'+tips[ks[0].k];
+}
 </script>
 </body>
 </html>
