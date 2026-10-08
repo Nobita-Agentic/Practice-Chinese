@@ -7598,7 +7598,7 @@ function stopSpeaking(){ try{ if(hasTTS) speechSynthesis.cancel(); }catch(e){} t
 
 function speakZh(text, rate){
   const t = cleanZh(text); if(!t) return;
-  if(Mic.active || Mic.starting) return;
+  if(Mic.active || Mic.starting){ try{ micStop(); }catch(e){} }
   if(S.audioMode==='online' || !hasTTS){ playOnline(t); return; }
   let started=false;
   try{
@@ -10814,7 +10814,10 @@ function micListen(target, cb, statusId, opts){
     Mic.err = code;
     Mic.lastErr = code==='no-speech' ? 'ไม่ได้ยินเสียงเลย — ไม่นับเป็นครั้งที่ลอง แตะไมค์แล้วพูดดังขึ้นอีกนิด'
                 : (ERR_TH[code] || ('เกิดข้อผิดพลาด: '+code)) + (code==='aborted' ? '' : ' (ไม่นับเป็นครั้งที่ลอง)');
-    if(code==='not-allowed' || code==='service-not-allowed' || code==='audio-capture') renderMicStatus();
+    if(code==='not-allowed' || code==='service-not-allowed' || code==='audio-capture' || code==='network'){
+      try{ r.onend = null; r.abort(); }catch(e){}
+      micFinish(); micStatus(Mic.lastErr); renderMicStatus();
+    }
   };
   r.onend = ()=>{
     clearTimeout(Mic.silence);
@@ -10837,10 +10840,12 @@ function micListen(target, cb, statusId, opts){
     cbf(res.pass, res.heard, res);
   };
   clearTimeout(Mic.timer);
-  Mic.timer = setTimeout(()=>{ if(Mic.active || Mic.starting) micEndNow(); }, 12000);
+  Mic.timer = setTimeout(()=>{ if(Mic.active || Mic.starting){ micEndNow(); setTimeout(()=>{ if(Mic.active || Mic.starting) micStop(); }, 1500); } }, 12000);
+  clearTimeout(Mic.startDog);
+  Mic.startDog = setTimeout(()=>{ if(Mic.starting && !Mic.active){ micStop(); micStatus('ไมค์ไม่ตอบสนอง — ตรวจสิทธิ์ไมโครโฟนของเบราว์เซอร์ แล้วแตะไมค์อีกครั้ง'); } }, 6000);
   try{ r.start(); }catch(err){ Mic.starting=false; micFinish(); micStatus('เริ่มฟังไม่สำเร็จ ลองแตะไมค์อีกครั้ง'); }
 }
-function micFinish(){ Mic.active=false; Mic.starting=false; Mic.cb=null; clearTimeout(Mic.timer); clearTimeout(Mic.silence); micBusy(false); }
+function micFinish(){ Mic.active=false; Mic.starting=false; Mic.cb=null; clearTimeout(Mic.timer); clearTimeout(Mic.silence); clearTimeout(Mic.startDog); micBusy(false); }
 function micStop(){ const was = Mic.active || Mic.starting; try{ if(Mic.rec){ Mic.rec.onend=null; Mic.rec.abort(); } }catch(e){} micFinish(); if(was) micStatus('แตะไมโครโฟน แล้วออกเสียงตามด้านบน'); }
 function spLogOpt(res, base){ return Object.assign({ sc: res.partial ? 40 : res.score, gr: res.level, h: res.heard, a: res.attempt }, base||{}); }
 
@@ -11506,6 +11511,12 @@ function moreOpen(){
 }
 function moreClose(){ show('more-sheet', false); }
 (function(){ const f = switchTab; switchTab = function(t){ f(t); const nav = ['home','drill','game','au']; const m = el('tab-more'); if(m) m.classList.toggle('on', !nav.includes(t)); try{ actNavHeight(); }catch(e){} }; })();
+</script>
+<script>
+(function(){ let done=false; const unlock=()=>{ if(done) return; done=true;
+  try{ if(window.speechSynthesis && window.SpeechSynthesisUtterance){ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); } }catch(e){}
+  ['touchend','click','keydown'].forEach(ev=>document.removeEventListener(ev, unlock, true)); };
+  ['touchend','click','keydown'].forEach(ev=>document.addEventListener(ev, unlock, true)); })();
 </script>
 </body>
 </html>
