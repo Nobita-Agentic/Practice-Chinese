@@ -99,7 +99,7 @@ section.screen{display:flex;flex-direction:column;gap:12px}
   position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--card);
   border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);
 }
-.nav .row{display:grid;grid-template-columns:repeat(7,1fr);max-width:560px;margin:0 auto}
+.nav .row{display:grid;grid-template-columns:repeat(5,1fr);max-width:560px;margin:0 auto}
 .navbtn{
   display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 1px 9px;
   color:var(--dim);font-size:10px;font-weight:500;position:relative;line-height:1.25;
@@ -580,6 +580,22 @@ body:has(#ans-pop:not(.hide)) .toast{bottom:auto;top:calc(env(safe-area-inset-to
 .au-bar{position:sticky;bottom:calc(var(--navh,64px) + 8px);z-index:25;display:flex;gap:8px;align-items:center;background:color-mix(in srgb,var(--card) 94%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:8px;border-radius:18px;border:1px solid var(--line);box-shadow:0 10px 28px rgba(0,0,0,.16)}
 .au-bar .btn.icon{min-height:52px;width:52px;flex:0 0 52px;font-size:17px}
 .au-main{flex:1;min-height:56px;font-size:16px;font-weight:700;border-radius:14px}
+
+/* ---------- เว้นที่ด้านล่าง + เมนูล่าง 5 ปุ่ม ---------- */
+main.wrap{padding:14px 14px calc(var(--navh,64px) + 48px + env(safe-area-inset-bottom))}
+@media(min-width:820px){ main.wrap{padding-left:20px;padding-right:20px} }
+.sheet,.py-sheet,.ans-sheet{max-height:calc(100dvh - 24px)}
+.modal{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+.navbtn{padding:10px 2px 9px;font-size:11.5px;gap:3px;min-height:58px;justify-content:center}
+.navbtn i{font-size:20px}
+.more-sheet{text-align:left;overflow-y:auto}
+.more-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:16px}
+.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.more-item{display:flex;gap:10px;align-items:center;text-align:left;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--soft);min-height:60px;font-size:13.5px;font-weight:600}
+.more-item i{width:34px;height:34px;flex:0 0 34px;border-radius:10px;display:grid;place-items:center;color:var(--onAccent);font-size:15px}
+.more-item.on{border-color:var(--jade);background:var(--jadeS)}
+html.nofa .fa-bars::before{content:"☰"} html.nofa .fa-house::before{content:"⌂"}
+html.nofa .fa-gamepad::before{content:"🎮"} html.nofa .fa-headphones-simple::before,html.nofa .fa-headphones::before{content:"🎧"} html.nofa .fa-truck-fast::before{content:"🚚"} html.nofa .fa-ear-listen::before{content:"👂"} html.nofa .fa-xmark::before{content:"✕"} html.nofa .fa-pen-to-square::before{content:"✎"}
 </style>
 </head>
 <body>
@@ -977,14 +993,18 @@ body:has(#ans-pop:not(.hide)) .toast{bottom:auto;top:calc(env(safe-area-inset-to
 <nav class="nav">
   <div class="row">
     <button class="navbtn on" id="tab-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>หน้าหลัก</span></button>
-    <button class="navbtn" id="tab-pinyin" onclick="switchTab('pinyin')"><i class="fa-solid fa-language"></i><span>พินอิน</span></button>
-    <button class="navbtn" id="tab-flash" onclick="switchTab('flash')"><i class="fa-solid fa-clone"></i><span>การ์ด</span></button>
     <button class="navbtn" id="tab-drill" onclick="switchTab('drill')"><i class="fa-solid fa-pen-to-square"></i><span>ฝึกหัด</span></button>
-    <button class="navbtn" id="tab-game" onclick="switchTab('game')"><i class="fa-solid fa-headphones"></i><span>เกม</span></button>
-    <button class="navbtn" id="tab-dialog" onclick="switchTab('dialog')"><i class="fa-solid fa-comments"></i><span>สนทนา</span></button>
-    <button class="navbtn" id="tab-ls" onclick="switchTab('ls')"><i class="fa-solid fa-ear-listen"></i><span>ฟัง-พูด</span></button>
+    <button class="navbtn" id="tab-game" onclick="switchTab('game')"><i class="fa-solid fa-gamepad"></i><span>เกม</span></button>
+    <button class="navbtn" id="tab-au" onclick="switchTab('au')"><i class="fa-solid fa-headphones-simple"></i><span>ฟัง</span></button>
+    <button class="navbtn" id="tab-more" onclick="moreOpen()"><i class="fa-solid fa-bars"></i><span>เมนู</span></button>
   </div>
 </nav>
+<div class="modal hide" id="more-sheet" onclick="if(event.target===this)moreClose()">
+  <div class="sheet more-sheet" role="dialog" aria-modal="true" aria-label="เมนูทั้งหมด">
+    <div class="more-head"><b>เมนูทั้งหมด</b><button class="btn icon sm ghost" onclick="moreClose()" aria-label="ปิด"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="more-grid" id="more-grid"></div>
+  </div>
+</div>
 <button id="tab-bank" class="hide" onclick="switchTab('bank')"></button>
 
 <div class="toast hide" id="toast"></div>
@@ -11468,6 +11488,24 @@ HOME_MENU.unshift({ t:'ฟังอัตโนมัติ 🎧', d:'นิท�
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', go); else go();
 })();
 
+</script>
+<script>
+/* ---------- เมนูล่าง 5 ปุ่ม + เมนูทั้งหมด ---------- */
+const MORE_ITEMS = [
+  ['pinyin','พื้นฐานพินอิน','fa-language','var(--seal)'], ['flash','การ์ดคำศัพท์','fa-clone','var(--jade)'],
+  ['dialog','บทสนทนา','fa-comments','var(--jade)'], ['speak','ฝึกพูดกับไมค์','fa-microphone','var(--seal)'],
+  ['ls','ฟัง-พูด 听说','fa-ear-listen','var(--seal)'], ['exp','ศัพท์งาน Express','fa-truck-fast','var(--gold)'],
+  ['au','ฟังอัตโนมัติ','fa-headphones-simple','var(--jade)'], ['bank','คลังคำศัพท์','fa-book-open','var(--gold)'],
+  ['progress','ความก้าวหน้า','fa-chart-line','var(--jade)'], ['home','หน้าหลัก','fa-house','var(--gold)']
+];
+function curTab(){ return TABS.find(t=>el('sec-'+t) && !el('sec-'+t).classList.contains('hide')) || 'home'; }
+function moreOpen(){
+  const cur = curTab();
+  el('more-grid').innerHTML = MORE_ITEMS.filter(m=>TABS.includes(m[0])).map(m=>'<button class="more-item'+(m[0]===cur?' on':'')+'" onclick="moreClose();switchTab(\''+m[0]+'\')"><i class="fa-solid '+m[2]+'" style="background:'+m[3]+'"></i><span>'+m[1]+'</span></button>').join('');
+  show('more-sheet', true);
+}
+function moreClose(){ show('more-sheet', false); }
+(function(){ const f = switchTab; switchTab = function(t){ f(t); const nav = ['home','drill','game','au']; const m = el('tab-more'); if(m) m.classList.toggle('on', !nav.includes(t)); try{ actNavHeight(); }catch(e){} }; })();
 </script>
 </body>
 </html>
