@@ -10785,12 +10785,13 @@ function micListen(target, cb, statusId, opts){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   try{ if(Mic.rec){ Mic.rec.onend=null; Mic.rec.onresult=null; Mic.rec.onerror=null; Mic.rec.abort(); } }catch(e){}
   const r = new SR(); Mic.rec = r;
-  r.lang = 'zh-CN'; r.continuous = !SP_IOS; r.interimResults = true; r.maxAlternatives = 5;
+  r.lang = opts.lang || 'zh-CN'; r.continuous = !SP_IOS; r.interimResults = true; r.maxAlternatives = 5;
   Mic.starting = true;
-  micStatus('⏳ กำลังเตรียมไมค์…');
+  const MZ = opts.ui==='zh';
+  micStatus(MZ ? '⏳ 正在准备麦克风…' : '⏳ กำลังเตรียมไมค์…');
   r.onstart = ()=>{
     Mic.starting = false; Mic.active = true; micBusy(true);
-    micStatus('🎙️ พูดได้เลย! (แตะไมค์อีกครั้งเมื่อพูดจบ)');
+    micStatus(MZ ? '🎙️ 请说！（说完再点一下麦克风）' : '🎙️ พูดได้เลย! (แตะไมค์อีกครั้งเมื่อพูดจบ)');
     try{ if(navigator.vibrate) navigator.vibrate(35); }catch(e){}
   };
   r.onresult = (e)=>{
@@ -10805,7 +10806,7 @@ function micListen(target, cb, statusId, opts){
     }
     Mic.finals = fin; Mic.interim = inter.map(x=>x[0]).join('');
     const live = fin.map(x=>x[0]).join('') + Mic.interim;
-    micStatus('👂 ได้ยิน: ' + (live || '…'));
+    micStatus((MZ ? '👂 听到：' : '👂 ได้ยิน: ') + (live || '…'));
     clearTimeout(Mic.silence);
     Mic.silence = setTimeout(micEndNow, 1600);
   };
@@ -10831,12 +10832,12 @@ function micListen(target, cb, statusId, opts){
     } else if(inter) alts = [inter];
     alts = alts.filter(x=>lsHz(spNormText(x)).length);
     if(!alts.length){
-      micStatus(Mic.err && Mic.err!=='no-speech' && Mic.err!=='aborted' ? Mic.lastErr : 'ไม่ได้ยินเสียง — ไม่นับเป็นครั้งที่ลอง แตะไมค์แล้วพูดอีกครั้ง');
+      micStatus(Mic.err && Mic.err!=='no-speech' && Mic.err!=='aborted' ? Mic.lastErr : (MZ ? '没有听到声音（不计次数），请点麦克风再说一遍' : 'ไม่ได้ยินเสียง — ไม่นับเป็นครั้งที่ลอง แตะไมค์แล้วพูดอีกครั้ง'));
       return;
     }
-    const res = speechScore(Mic.target, alts, (Mic.opts||{}).py);
+    const res = ((Mic.opts||{}).scorer || speechScore)(Mic.target, alts, (Mic.opts||{}).py);
     if((Mic.opts||{}).judge!==false) speechJudge((Mic.opts||{}).key || Mic.target, res);
-    micStatus(res.pass ? '✓ ตรวจแล้ว' : 'แตะไมค์เพื่อพูดอีกครั้ง');
+    micStatus(res.pass ? (MZ ? '✓ 已检查' : '✓ ตรวจแล้ว') : (MZ ? '点麦克风再说一次' : 'แตะไมค์เพื่อพูดอีกครั้ง'));
     cbf(res.pass, res.heard, res);
   };
   clearTimeout(Mic.timer);
